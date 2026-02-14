@@ -2,6 +2,34 @@
 
 Welcome to **Congkak Quest**, a polished mobile-first adventure game that brings the traditional Malay game of Congkak to life with a modern RPG interface and semi-realistic village aesthetics.
 
+---
+
+## 🏆 Krackathon - Prompt 02: Heritage Reimagined Checklist
+
+This project is built for the **KrackedDevs Hackathon**. Below is the checklist of requirements and how we've addressed them:
+
+### 🎯 Core Requirements
+- [x] **Web-Based Game**: Built using Vite, Three.js, and Vanilla CSS for seamless browser performance.
+- [x] **Inspired by Traditional Pastime**: A modern retelling of the classic Malay game, **Congkak**.
+- [x] **Innovative Mechanics**: 
+    - Introduced **Special Gulis**: 🔵 Blue (Extra Turn) and 🟡 Gold (Double Points).
+    - RPG-style progression with **Energy** and **Coin** systems.
+- [x] **Unconventional Level Design**: Not just a board game, but a **3D World Exploration** game where you hunt for gulis in a tropical village.
+- [x] **Unique Storytelling**: Features **Tok Aki**, the village guardian, with a dialogue system and a mystery to solve (the scattered gulis).
+- [x] **Visually Distinct**: Blends low-poly 3D environments with a premium, high-fidelity mobile RPG HUD.
+- [x] **Technically Impressive**: 
+    - Custom implemented **Congkak Physics Engine**.
+    - Mobile-optimized **Virtual Joystick** (NippleJS).
+    - Custom **AABB Collision System** for village exploration.
+
+### 🌟 Bonus & Advanced Goals
+- [x] **Exploration & Progression**: Integrated a **World Map** and level-based quest system.
+- [x] **Mobile-First Optimization**: Designed specifically to be played on smartphones with touch-friendly controls and responsive UI.
+- [ ] **Real-time Multiplayer**: Currently Single Player vs. Smart AI (Strategic Tok Aki).
+- [x] **Seamless Performance**: Optimized 3D assets and efficient rendering loop for smooth 60FPS mobile play.
+
+---
+
 ## 🌟 Game Features
 
 ### 🌎 Exploration Mode
@@ -50,4 +78,4 @@ Welcome to **Congkak Quest**, a polished mobile-first adventure game that brings
 3. **Compete**: Select a hole on your side (bottom row) to start distributing gulis. Outsmart Tok Aki to win rewards!
 
 ---
-*Created for the Hackathon - Heritage Reimagined.*
+*Created for the KrackedDevs Hackathon - Heritage Reimagined.*
