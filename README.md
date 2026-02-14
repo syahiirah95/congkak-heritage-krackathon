@@ -27,8 +27,8 @@ This project was developed using a cutting-edge **Vibe Coding** workflow, combin
 | Component | Technology | Role |
 | :--- | :--- | :--- |
 | **Agentic IDE** | **Antigravity** | Orchestrating complex code edits and world building. |
-| **Brain (Logic)** | **Claude 3.5 Sonnet / Opus 4.6** | Algorithm design, Congkak engine logic, and AI strategy. |
-| **Brain (Speed)** | **Gemini 2.0 Flash / 3 Flash** | Rapid prototyping, UI adjustments, and system optimization. |
+| **Brain (Logic)** | **Claude Opus 4.6** | Algorithm design, Congkak engine logic, and AI strategy. |
+| **Brain (Speed)** | **Gemini 3 Flash** | Rapid prototyping, UI adjustments, and system optimization. |
 | **Art (Gen)** | **FLUX.1 [dev]** | Realistic textures, character portraits, and UI textures. |
 | **Art (Polish)** | **Canva** | Background removal, retouching, and asset composition. |
 
