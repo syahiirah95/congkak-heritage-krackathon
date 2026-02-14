@@ -107,17 +107,19 @@ export class World {
         this.createBird(15, 6);
 
         // Monkeys: some on ground, some on trees/houses
+        // Monkeys: some on ground, some on trees/houses
         this.createMonkey(45, -3); // Ground
         this.createMonkey(-15, -4); // Ground
-        this.createMonkey(-10, -2, 4.5, 'climber'); // On Tok Aki's house/nearby roof
-        this.createMonkey(10, -3, 4.5, 'climber'); // On a house
-        this.createMonkey(25, -6, 4.5, 'climber'); // On another house
+        this.createMonkey(5, -2, 4.0, 'climber'); // On Tok Aki's house/nearby roof
+        this.createMonkey(11, -2.5, 4.0, 'climber'); // On house
+        this.createMonkey(26, -5.5, 4.0, 'climber'); // On house
+        this.createMonkey(-38, -1.8, 4.0, 'climber'); // On further house
 
         // Random monkeys on trees
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 5; i++) {
             const tx = (Math.random() - 0.5) * 80;
-            const tz = -15 - Math.random() * 5;
-            this.createMonkey(tx, tz, 5.5, 'climber'); // On tree canopy height
+            const tz = -15 - Math.random() * 10;
+            this.createMonkey(tx, tz, 4.2, 'climber'); // On tree canopy height (canopy is at 3.5 + radius)
         }
         // --- ADDITIONAL NPCs ---
         this.createNPC(-26, 0, 3, "Tok Mat"); // Watching Gasing
