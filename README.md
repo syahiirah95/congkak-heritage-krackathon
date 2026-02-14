@@ -5,17 +5,17 @@
 
 ---
 
-## ✅ Hackathon Requirements Checklist
+## ✅ Krackathon Alignment Checklist
 
-| Requirement | Implementation Detail | Status |
+We have reimagined the traditional game of **Congkak** by mapping its evolution to the specific innovation categories requested in the hackathon brief:
+
+| Innovation Category | Our Implementation (Congkak Quest) | Status |
 | :--- | :--- | :---: |
-| **Web-Based Game** | Built using Vite, Three.js, and Vanilla CSS for high performance. | [x] |
-| **Traditional Inspiration** | A modern reimagining of **Congkak**, preserving its core rules. | [x] |
-| **Innovative Mechanics** | **Special Gulis**: 🔵 Blue (Extra Turn) & 🟡 Gold (Double Points). | [x] |
-| **Unconventional Design** | **3D World Exploration** where you hunt for gulis in a village. | [x] |
-| **Unique Storytelling** | NPC Interactions with **Tok Aki** and a dialogue-driven quest. | [x] |
-| **Visually Distinct** | High-fidelity RPG HUD blended with semi-realistic 3D assets. | [x] |
-| **Technically Impressive**| Custom Congkak Engine, Virtual Joystick, and AABB Collision. | [x] |
+| **01 Environmental & Dynamic Boards** | **Dynamic Seed Physics**: Introduced **Special Gulis** with unique properties. Blue Guli (Extra Turn/Speed) and Gold Guli (Score Multiplier) transform the static board into a dynamic tactical field. | [x] |
+| **02 Roguelike or Progression Mechanics** | **Large-Scale Adventure**: Turned the short 5-minute Congkak session into a **Long-form 3D Adventure**. Players must explore the village, interact with Tok Aki, and "farm" gulis to progress. | [x] |
+| **03 Rhythm & Precision Integration** | **Mechanical Precision**: Merged traditional board play with an **Exploration Scavenger Hunt**, requiring precision in finding hidden assets and strategic distribution of seeds. | [x] |
+| **04 Asymmetrical Dynamics** | **Smart AI Strategist**: Implemented a "Master vs Apprentice" dynamic where Tok Aki (AI) uses an asymmetrical weighted strategy to challenge the player’s collection-based progression. | [x] |
+| **Bonus: Technical Excellence** | **Seamless Browser Performance**: Optimized Three.js rendering and custom collision engines ensure a "Vite-fast" 60FPS experience on mobile browsers. | [x] |
 
 ---
 
@@ -41,7 +41,6 @@ This project was developed using a cutting-edge **Vibe Coding** workflow, combin
 | **Styling** | **Vanilla CSS3** | Custom glassmorphism, RPG typography, and animations. |
 | **Language** | **Modern JavaScript (ES6+)** | Clean, modular, and asynchronous game logic. |
 | **Version Control** | **Git / GitHub** | Source control and collaboration. |
-| **Physics** | **Custom AABB** | Hand-coded Axis-Aligned Bounding Box collision system. |
 
 ---
 
@@ -62,14 +61,6 @@ This project was developed using a cutting-edge **Vibe Coding** workflow, combin
 | **Special Seeds** | 🟡 Gold (2x Score) and 🔵 Blue (Immediate Extra Turn). |
 | **AI Opponent** | **Tok Aki**: A strategic AI that calculates optimal moves. |
 | **Visuals** | Animated 3D seeds and dynamic hole highlighting. |
-
-### 📱 Premium UI/UX
-| Element | Description |
-| :--- | :--- |
-| **Mobile-First** | Fully responsive with virtual joystick (NippleJS). |
-| **RPG HUD** | Top status bar for Energy, Coins, Gulis, and XP. |
-| **World Map** | Level selection with a winding path and star ratings. |
-| **Navigation** | Seamless transitions between Story, Explore, and Board modes. |
 
 ---
 
