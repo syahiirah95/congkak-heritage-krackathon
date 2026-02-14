@@ -5,8 +5,7 @@ const ANIMAL_QUOTES = {
     chicken: ["Kwek! Kwek!", "Tok Aki ada guli?", "Mana cacing ni...", "Kwek?", "Jom main Congkak!"],
     cat: ["Meow~", "Nak ikan...", "Purrr...", "Tepi sikit, aku nak tidur.", "Miau!"],
     sheep: ["Mbeee!", "Rumput sedap!", "Mana kambing lain?", "Mbeee~", "Kite geng Tok Aki!"],
-    cow: ["Moooo!", "Lembunya!", "Susu segar!", "Moo?", "Rileks la bro."],
-    monkey: ["Uuak uuak!", "Ada pisang?", "Kera sakti!", "Uuak!", "Aku nak guli tu!"]
+    cow: ["Moooo!", "Lembunya!", "Susu segar!", "Moo?", "Rileks la bro."]
 };
 
 export class World {
@@ -106,21 +105,6 @@ export class World {
         this.createBird(-10, 8); // Flying bird
         this.createBird(15, 6);
 
-        // Monkeys: some on ground, some on trees/houses
-        // Monkeys: some on ground, some on trees/houses
-        this.createMonkey(45, -3); // Ground
-        this.createMonkey(-15, -4); // Ground
-        this.createMonkey(5, -2, 4.0, 'climber'); // On Tok Aki's house/nearby roof
-        this.createMonkey(11, -2.5, 4.0, 'climber'); // On house
-        this.createMonkey(26, -5.5, 4.0, 'climber'); // On house
-        this.createMonkey(-38, -1.8, 4.0, 'climber'); // On further house
-
-        // Random monkeys on trees
-        for (let i = 0; i < 5; i++) {
-            const tx = (Math.random() - 0.5) * 80;
-            const tz = -15 - Math.random() * 10;
-            this.createMonkey(tx, tz, 4.2, 'climber'); // On tree canopy height (canopy is at 3.5 + radius)
-        }
         // --- ADDITIONAL NPCs ---
         this.createNPC(-26, 0, 3, "Tok Mat"); // Watching Gasing
         this.createNPC(20, 0, 2, "Kak Long"); // Playing Batu Seremban
@@ -608,62 +592,6 @@ export class World {
         this.animals.push({ mesh: group, velocity: new THREE.Vector3(), timer: 0, type: 'bird', baseHeight: body.position.y });
     }
 
-    createMonkey(x, z, y = 0, subType = 'ground') {
-        const group = new THREE.Group();
-        const body = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.4, 0.25), new THREE.MeshStandardMaterial({ color: 0x8b4513 }));
-        body.position.y = 0.35;
-        group.add(body);
-
-        const head = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), new THREE.MeshStandardMaterial({ color: 0xcd853f }));
-        head.position.set(0, 0.6, 0);
-        group.add(head);
-
-        // Ears
-        const eGeom = new THREE.BoxGeometry(0.08, 0.08, 0.04);
-        const eL = new THREE.Mesh(eGeom, new THREE.MeshStandardMaterial({ color: 0x8b4513 }));
-        eL.position.set(0.12, 0.65, 0);
-        group.add(eL);
-        const eR = new THREE.Mesh(eGeom, new THREE.MeshStandardMaterial({ color: 0x8b4513 }));
-        eR.position.set(-0.12, 0.65, 0);
-        group.add(eR);
-
-        // Tail
-        const tail = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.03, 8, 8, Math.PI), new THREE.MeshStandardMaterial({ color: 0x8b4513 }));
-        tail.position.set(0, 0.45, -0.15);
-        tail.rotation.y = Math.PI / 2;
-        group.add(tail);
-
-        // Arms & Legs
-        const limbGeom = new THREE.BoxGeometry(0.08, 0.35, 0.08);
-        const lMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
-        // Legs
-        const legL = new THREE.Mesh(limbGeom, lMat);
-        legL.position.set(0.1, 0.15, 0);
-        group.add(legL);
-        const legR = new THREE.Mesh(limbGeom, lMat);
-        legR.position.set(-0.1, 0.15, 0);
-        group.add(legR);
-        // Arms
-        const armL = new THREE.Mesh(limbGeom, lMat);
-        armL.position.set(0.15, 0.45, 0.1);
-        armL.rotation.x = -0.5;
-        group.add(armL);
-        const armR = new THREE.Mesh(limbGeom, lMat);
-        armR.position.set(-0.15, 0.45, 0.1);
-        armR.rotation.x = -0.5;
-        group.add(armR);
-
-        group.position.set(x, y, z);
-        this.scene.add(group);
-        this.animals.push({
-            mesh: group,
-            velocity: new THREE.Vector3(),
-            timer: 0,
-            type: 'monkey',
-            subType: subType,
-            baseY: y
-        });
-    }
 
     update(dt, camera, player) {
         this.animals.forEach(animal => {
@@ -673,7 +601,6 @@ export class World {
             if (animal.type === 'chicken') speed = 0.05;
             if (animal.type === 'cow') speed = 0.02;
             if (animal.type === 'bird') speed = 0.08;
-            if (animal.type === 'monkey') speed = 0.07;
 
             if (animal.timer <= 0) {
                 // Change direction
@@ -701,12 +628,6 @@ export class World {
                 const wings = animal.mesh.children[1];
                 if (wings) wings.rotation.z = Math.sin(Date.now() * 0.02) * 0.5;
                 animal.mesh.position.y = animal.baseHeight + Math.sin(Date.now() * 0.005) * 0.5;
-            }
-            if (animal.type === 'monkey') {
-                // Subtle hops for ground, tiny fidgeting for climbers
-                const hopHeight = animal.subType === 'climber' ? 0.05 : 0.15;
-                const hopSpeed = animal.subType === 'climber' ? 0.005 : 0.012;
-                animal.mesh.position.y = animal.baseY + Math.abs(Math.sin(Date.now() * hopSpeed)) * hopHeight;
             }
 
             // TOOLTIP LOGIC
