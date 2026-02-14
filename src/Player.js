@@ -147,30 +147,8 @@ export class Player {
             moveDir.applyQuaternion(this.mesh.quaternion);
             moveDir.normalize();
 
-            // Potential next position
-            const nextPos = this.mesh.position.clone().addScaledVector(moveDir, this.speed);
-
-            // Standard AABB Collision Check
-            const playerBox = new THREE.Box3().setFromCenterAndSize(
-                nextPos.clone().add(new THREE.Vector3(0, 1, 0)),
-                new THREE.Vector3(0.6, 2, 0.6)
-            );
-
-            let collision = false;
-            for (const prop of worldProps) {
-                if (!prop.boundingBox) {
-                    prop.boundingBox = new THREE.Box3().setFromObject(prop);
-                }
-
-                if (playerBox.intersectsBox(prop.boundingBox)) {
-                    collision = true;
-                    break;
-                }
-            }
-
-            if (!collision) {
-                this.mesh.position.copy(nextPos);
-            }
+            // Movement without collision (ghost mode)
+            this.mesh.position.copy(nextPos);
 
             const time = Date.now() * 0.01;
             this.leftLeg.rotation.x = Math.sin(time) * 0.5;

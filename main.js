@@ -292,6 +292,7 @@ class Game {
         requestAnimationFrame(() => this.animate());
         if (this.gameState === 'EXPLORE' || this.gameState === 'STORY') {
             this.player.update(dt, this.world.props);
+            this.world.update(dt, this.camera, this.player);
             if (this.gameState === 'EXPLORE') this.guliManager.update();
         }
         this.renderer.render(this.scene, this.camera);

@@ -1,12 +1,17 @@
-import * as THREE from 'three';
 import { NPC } from './NPC.js';
+
+const ANIMAL_QUOTES = {
+    chicken: ["Kwek! Kwek!", "Tok Aki ada guli?", "Mana cacing ni...", "Kwek?", "Jom main Congkak!"],
+    cat: ["Meow~", "Nak ikan...", "Purrr...", "Tepi sikit, aku nak tidur.", "Miau!"]
+};
 
 export class World {
     constructor(scene) {
-        this.scene = scene;
         this.textureLoader = new THREE.TextureLoader();
         this.props = [];
+        this.animals = [];
         this.hidingSpots = []; // Positions for guli
+        this.animalBubbles = new Map(); // Store DOM elements for bubbles
         this.generateBaseWorld();
     }
 
@@ -35,8 +40,14 @@ export class World {
 
         housePositions.forEach(pos => {
             this.createHouse(pos.x, pos.z);
-            this.hidingSpots.push(new THREE.Vector3(pos.x, 0.5, pos.z + 2.5));
         });
+
+        // RANDOM HIDING SPOTS EVERYWHERE (Not just bushes/houses)
+        for (let i = 0; i < 40; i++) {
+            const rx = (Math.random() - 0.5) * 100;
+            const rz = (Math.random() - 0.5) * 20;
+            this.hidingSpots.push(new THREE.Vector3(rx, 0.5, rz));
+        }
 
         // Background Forest (Mario-style backdrop)
         for (let i = 0; i < 40; i++) {
@@ -56,13 +67,11 @@ export class World {
         this.createBountyBoard(-4, 0, -2);
         this.createNPC(4, 0, -2);
 
-        // Bushes (Hiding spots near the path)
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 20; i++) {
             const bx = (Math.random() - 0.5) * 80;
-            const bz = (Math.random() - 0.5) * 5;
+            const bz = (Math.random() - 0.5) * 10;
             if (Math.abs(bx) > 3) {
                 this.createBush(bx, bz);
-                this.hidingSpots.push(new THREE.Vector3(bx, 0.5, bz));
             }
         }
 
@@ -402,7 +411,14 @@ export class World {
 
         group.position.set(x, 0, z);
         this.scene.add(group);
-        // Removed from this.props to allow player movement
+
+        // Add movement state
+        this.animals.push({
+            mesh: group,
+            velocity: new THREE.Vector3(),
+            timer: 0,
+            type: 'chicken'
+        });
     }
 
     createCat(x, z) {
@@ -425,6 +441,82 @@ export class World {
         group.position.set(x, 0, z);
         group.rotation.y = Math.random() * Math.PI * 2;
         this.scene.add(group);
-        // Removed from this.props to allow player movement
+
+        // Add movement state
+        this.animals.push({
+            mesh: group,
+            velocity: new THREE.Vector3(),
+            timer: 0,
+            type: 'cat'
+        });
+    }
+
+    update(dt, camera, player) {
+        this.animals.forEach(animal => {
+            animal.timer -= dt;
+            if (animal.timer <= 0) {
+                // Change direction
+                const angle = Math.random() * Math.PI * 2;
+                animal.mesh.rotation.y = angle;
+                const speed = animal.type === 'chicken' ? 0.05 : 0.03;
+                animal.velocity.set(Math.sin(angle) * speed, 0, Math.cos(angle) * speed);
+                animal.timer = 1 + Math.random() * 3; // Move for 1-4 seconds
+            }
+
+            // Move
+            animal.mesh.position.add(animal.velocity);
+
+            // Boundary check
+            if (Math.abs(animal.mesh.position.x) > 50) animal.velocity.x *= -1;
+            if (Math.abs(animal.mesh.position.z) > 15) animal.velocity.z *= -1;
+
+            // Simple "walking" bob
+            if (animal.type === 'chicken') {
+                animal.mesh.position.y = Math.abs(Math.sin(Date.now() * 0.01)) * 0.1;
+            }
+
+            // TOOLTIP LOGIC
+            const dist = player.mesh.position.distanceTo(animal.mesh.position);
+            if (dist < 5) {
+                this.showAnimalBubble(animal, camera);
+            } else {
+                this.hideAnimalBubble(animal);
+            }
+        });
+    }
+
+    showAnimalBubble(animal, camera) {
+        if (!this.animalBubbles.has(animal)) {
+            const bubble = document.createElement('div');
+            bubble.className = 'animal-bubble';
+            const quotes = ANIMAL_QUOTES[animal.type];
+            bubble.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+            document.body.appendChild(bubble);
+            this.animalBubbles.set(animal, bubble);
+        }
+
+        const bubble = this.animalBubbles.get(animal);
+
+        // Project 3D position to 2D screen
+        const pos = animal.mesh.position.clone().add(new THREE.Vector3(0, 1.2, 0));
+        pos.project(camera);
+
+        const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (-(pos.y * 0.5) + 0.5) * window.innerHeight;
+
+        bubble.style.left = `${x}px`;
+        bubble.style.top = `${y}px`;
+        bubble.style.opacity = '1';
+    }
+
+    hideAnimalBubble(animal) {
+        if (this.animalBubbles.has(animal)) {
+            const bubble = this.animalBubbles.get(animal);
+            bubble.style.opacity = '0';
+            setTimeout(() => {
+                if (bubble.parentElement) bubble.remove();
+                this.animalBubbles.delete(animal);
+            }, 300);
+        }
     }
 }
