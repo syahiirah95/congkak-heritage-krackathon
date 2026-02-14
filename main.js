@@ -134,13 +134,29 @@ class Game {
 
             this.congkakEngine.reset();
             this.congkakBoard.show();
-            this.congkakBoard.updateSeeds(this.congkakEngine.holes);
+            this.update2DUI(this.congkakEngine.holes);
             this.updateCongkakUI();
         });
 
         window.addEventListener('guli-collected', (e) => {
             this.addEnergy(2); // Recharge energy on collection
         });
+
+        // 2D Congkak Hole Clicks
+        for (let i = 0; i < 14; i++) {
+            const el = document.getElementById(`hole-${i}-2d`);
+            if (el && el.classList.contains('player-hole')) {
+                el.addEventListener('click', () => this.handleCongkakMove(i));
+            }
+        }
+
+        const exitCongkak = document.getElementById('exit-congkak-btn');
+        if (exitCongkak) {
+            exitCongkak.addEventListener('click', () => {
+                this.gameState = 'EXPLORE';
+                this.updateUIVisibility();
+            });
+        }
 
         window.addEventListener('click', (e) => this.onPlayerClick(e));
     }
@@ -154,8 +170,10 @@ class Game {
         const guliVault = document.getElementById('guli-vault');
         const congkakHud = document.getElementById('congkak-hud');
 
+        const congkak2D = document.getElementById('congkak-2d-overlay');
+
         // Reset all
-        [hud, topBar, bottomNav, exploreHud, bountyHud, guliVault, congkakHud].forEach(el => el?.classList.add('hidden'));
+        [hud, topBar, bottomNav, exploreHud, bountyHud, guliVault, congkakHud, congkak2D].forEach(el => el?.classList.add('hidden'));
 
         if (this.gameState === 'STORY') {
             // Only show story elements and minimal top bar
@@ -170,7 +188,7 @@ class Game {
         } else if (this.gameState === 'CONGKAK') {
             hud.classList.remove('hidden');
             topBar.classList.remove('hidden');
-            congkakHud.classList.remove('hidden');
+            document.getElementById('congkak-2d-overlay').classList.remove('hidden');
         }
     }
 
@@ -196,14 +214,14 @@ class Game {
         this.isProcessingMove = true;
         const moveGenerator = this.congkakEngine.makeMoveAnimated(holeIdx);
         for await (const step of moveGenerator) {
-            if (step.currentPos !== undefined) this.congkakBoard.highlightHole(step.currentPos);
+            if (step.currentPos !== undefined) this.update2DHighlights(step.currentPos);
             if (step.holes) {
-                this.congkakBoard.updateSeeds(step.holes);
+                this.update2DUI(step.holes);
                 this.updateCongkakUI();
             }
             await new Promise(resolve => setTimeout(resolve, step.status === 'dropping' ? 400 : 250));
             if (step.status === 'end') {
-                this.congkakBoard.highlightHole(null);
+                this.update2DHighlights(null);
                 if (step.gameOver) {
                     this.gameState = 'WIN';
                     const winScreen = document.getElementById('win-screen');
@@ -244,6 +262,29 @@ class Game {
         document.getElementById('game-status').textContent = this.isProcessingMove ? "DISTRIBUTING..." : turnText;
         document.getElementById('p1-score').textContent = this.congkakEngine.getScore(1);
         document.getElementById('ai-score').textContent = this.congkakEngine.getScore(2);
+        this.update2DUI(this.congkakEngine.holes);
+    }
+
+    update2DUI(holes) {
+        holes.forEach((count, i) => {
+            const el = document.getElementById(`hole-${i}-2d`);
+            if (el) {
+                const span = el.querySelector('span');
+                if (span) span.textContent = count;
+                else el.textContent = count; // Stores don't always have spans
+            }
+        });
+    }
+
+    update2DHighlights(activeIdx) {
+        for (let i = 0; i < 14; i++) {
+            const el = document.getElementById(`hole-${i}-2d`);
+            if (el) el.classList.remove('active');
+        }
+        if (activeIdx !== null) {
+            const activeEl = document.getElementById(`hole-${activeIdx}-2d`);
+            if (activeEl) activeEl.classList.add('active');
+        }
     }
 
     updateMapUI() {
@@ -279,6 +320,7 @@ class Game {
         this.guliManager.spawn(12, level.types);
 
         this.congkakBoard.hide();
+        document.getElementById('congkak-2d-overlay').classList.add('hidden');
         this.player.mesh.position.set(0, 0, 0);
 
         // Reset quest UI

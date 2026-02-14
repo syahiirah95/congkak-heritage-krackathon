@@ -1541,51 +1541,230 @@ body.pointer-locked #crosshair {
         transform: translate(-50%, -100%) translateY(-5px);
     }
 }
- / *   C o l l e c t i o n   &   R e c h a r g e   E f f e c t s   * / 
- . r e c h a r g e - f l a s h   { 
-         p o s i t i o n :   f i x e d ; 
-         t o p :   0 ; 
-         l e f t :   0 ; 
-         w i d t h :   1 0 0 v w ; 
-         h e i g h t :   1 0 0 v h ; 
-         b a c k g r o u n d :   r a d i a l - g r a d i e n t ( c i r c l e ,   r g b a ( 2 5 5 , 2 5 5 , 2 5 5 , 0 . 4 )   0 % ,   t r a n s p a r e n t   7 0 % ) ; 
-         p o i n t e r - e v e n t s :   n o n e ; 
-         z - i n d e x :   9 9 9 9 ; 
-         o p a c i t y :   0 ; 
- } 
- 
- . a n i m a t e - r e c h a r g e   { 
-         a n i m a t i o n :   f l a s h F a d e   0 . 6 s   e a s e - o u t ; 
- } 
- 
- @ k e y f r a m e s   f l a s h F a d e   { 
-         0 %   {   o p a c i t y :   0 . 8 ;   t r a n s f o r m :   s c a l e ( 0 . 8 ) ;   } 
-         1 0 0 %   {   o p a c i t y :   0 ;   t r a n s f o r m :   s c a l e ( 1 . 2 ) ;   } 
- } 
- 
- . e n e r g y - r e c h a r g e - p o p u p   { 
-         p o s i t i o n :   f i x e d ; 
-         t o p :   5 0 % ; 
-         l e f t :   5 0 % ; 
-         t r a n s f o r m :   t r a n s l a t e ( - 5 0 % ,   - 5 0 % ) ; 
-         c o l o r :   # f f f ; 
-         f o n t - s i z e :   2 r e m ; 
-         f o n t - w e i g h t :   9 0 0 ; 
-         t e x t - s h a d o w :   0   0   1 0 p x   # 0 0 f ,   0   0   2 0 p x   # 0 f f ; 
-         p o i n t e r - e v e n t s :   n o n e ; 
-         z - i n d e x :   1 0 0 0 0 ; 
-         d i s p l a y :   n o n e ; 
- } 
- 
- . a n i m a t e - p o p u p   { 
-         d i s p l a y :   b l o c k ; 
-         a n i m a t i o n :   p o p u p S l i d e U p   0 . 8 s   f o r w a r d s ; 
- } 
- 
- @ k e y f r a m e s   p o p u p S l i d e U p   { 
-         0 %   {   t r a n s f o r m :   t r a n s l a t e ( - 5 0 % ,   - 5 0 % )   s c a l e ( 0 . 5 ) ;   o p a c i t y :   0 ;   } 
-         5 0 %   {   t r a n s f o r m :   t r a n s l a t e ( - 5 0 % ,   - 1 0 0 % )   s c a l e ( 1 . 2 ) ;   o p a c i t y :   1 ;   } 
-         1 0 0 %   {   t r a n s f o r m :   t r a n s l a t e ( - 5 0 % ,   - 1 5 0 % )   s c a l e ( 1 ) ;   o p a c i t y :   0 ;   } 
- } 
-  
- 
+
+.gem-match {
+    animation: matchPop 0.4s forwards ease-out;
+}
+
+@keyframes gemDrop {
+    0% {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.gem-new {
+    animation: gemDrop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Collection & Recharge Effects */
+.recharge-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+}
+
+.animate-recharge {
+    animation: flashFade 0.6s ease-out;
+}
+
+@keyframes flashFade {
+    0% {
+        opacity: 0.8;
+        transform: scale(0.8);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+.energy-recharge-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 900;
+    text-shadow: 0 0 10px #00f, 0 0 20px #0ff;
+    pointer-events: none;
+    z-index: 10000;
+    display: none;
+}
+
+.animate-popup {
+    display: block;
+    animation: popupSlideUp 0.8s forwards;
+}
+
+@keyframes popupSlideUp {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+    }
+
+    50% {
+        transform: translate(-50%, -100%) scale(1.2);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -150%) scale(1);
+        opacity: 0;
+    }
+}
+
+/* ======================================================
+   2D CONGKAK OVERLAY (WHACK-A-MOLE STYLE)
+   ====================================================== */
+#congkak-2d-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 20px;
+}
+
+.board-2d-container {
+    background: rgba(139, 69, 19, 0.9);
+    border: 8px solid #5d2906;
+    border-radius: 100px;
+    padding: 40px 60px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    position: relative;
+    max-width: 90%;
+}
+
+.board-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.hole-2d {
+    width: 80px;
+    height: 80px;
+    background: #4a2b10;
+    border-radius: 50%;
+    box-shadow: inset 0 10px 20px rgba(0, 0, 0, 0.8), 0 2px 2px rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.hole-2d:hover {
+    transform: scale(1.05);
+    background: #5d3a1e;
+}
+
+.hole-2d.active {
+    box-shadow: 0 0 20px #ffd700, inset 0 10px 20px rgba(0, 0, 0, 0.8);
+}
+
+.hole-seeds {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #ffd700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.store-2d {
+    width: 120px;
+    height: 120px;
+    background: #3e240d;
+    border-radius: 50%;
+    box-shadow: inset 0 15px 30px rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.store-left {
+    left: -70px;
+}
+
+.store-right {
+    right: -70px;
+}
+
+.store-seeds {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.board-label {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-header);
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    color: #ffd700;
+    opacity: 0.8;
+}
+
+@media (max-width: 1000px) {
+    .hole-2d {
+        width: 45px;
+        height: 45px;
+    }
+
+    .hole-seeds {
+        font-size: 1rem;
+    }
+
+    .store-2d {
+        width: 70px;
+        height: 70px;
+    }
+
+    .store-seeds {
+        font-size: 1.5rem;
+    }
+
+    .store-left {
+        left: -40px;
+    }
+
+    .store-right {
+        right: -40px;
+    }
+
+    .board-2d-container {
+        padding: 25px 40px;
+    }
+}
