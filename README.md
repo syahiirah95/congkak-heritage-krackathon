@@ -1,12 +1,17 @@
-# Congkak Quest: Heritage Reimagined
+# 🏆 Krackathon: Heritage Reimagined
 
-Welcome to **Congkak Quest**, a polished mobile-first adventure game that brings the traditional Malay game of Congkak to life with a modern RPG interface and semi-realistic village aesthetics.
+## 📝 The Challenge: Prompt 02
+> "Breathe new life into Malaysia's rich cultural legacy by developing a web-based game inspired by traditional pastimes (e.g., Congkak, Gasing, Batu Seremban, or Wau Bulan)."
+
+**Your mission** is to preserve the soul of the original game while introducing a clever modern twist whether through innovative mechanics, unconventional level design, or unique storytelling.
+
+**The Goal:** Showcase how traditional play can evolve in a digital landscape. Think beyond a simple simulation; we want to see games that are addictive, visually distinct, and technically impressive.
 
 ---
 
-## 🏆 Krackathon - Prompt 02: Heritage Reimagined Checklist
+## ✅ Hackathon Requirements Checklist
 
-This project is built for the **KrackedDevs Hackathon**. Below is the checklist of requirements and how we've addressed them:
+This project addresses the Krackathon goals through the following implementation:
 
 ### 🎯 Core Requirements
 - [x] **Web-Based Game**: Built using Vite, Three.js, and Vanilla CSS for seamless browser performance.
@@ -22,15 +27,11 @@ This project is built for the **KrackedDevs Hackathon**. Below is the checklist 
     - Mobile-optimized **Virtual Joystick** (NippleJS).
     - Custom **AABB Collision System** for village exploration.
 
-### 🌟 Bonus & Advanced Goals
-- [x] **Exploration & Progression**: Integrated a **World Map** and level-based quest system.
-- [x] **Mobile-First Optimization**: Designed specifically to be played on smartphones with touch-friendly controls and responsive UI.
-- [ ] **Real-time Multiplayer**: Currently Single Player vs. Smart AI (Strategic Tok Aki).
-- [x] **Seamless Performance**: Optimized 3D assets and efficient rendering loop for smooth 60FPS mobile play.
-
 ---
 
-## 🌟 Game Features
+## 🎮 Project Overview: Congkak Quest
+
+**Congkak Quest** is a polished mobile-first adventure game that brings the traditional Malay game of Congkak to life with a modern RPG interface and semi-realistic village aesthetics.
 
 ### 🌎 Exploration Mode
 - **3rd Person Perspective**: Explore a beautifully crafted low-poly village.
@@ -78,4 +79,4 @@ This project is built for the **KrackedDevs Hackathon**. Below is the checklist 
 3. **Compete**: Select a hole on your side (bottom row) to start distributing gulis. Outsmart Tok Aki to win rewards!
 
 ---
-*Created for the KrackedDevs Hackathon - Heritage Reimagined.*
+*Developed for the KrackedDevs Hackathon - Heritage Reimagined.*
