@@ -6,7 +6,6 @@ const ANIMAL_QUOTES = {
     cat: ["Meow~", "Nak ikan...", "Purrr...", "Tepi sikit, aku nak tidur.", "Miau!"],
     sheep: ["Mbeee!", "Rumput sedap!", "Mana kambing lain?", "Mbeee~", "Kite geng Tok Aki!"],
     cow: ["Moooo!", "Lembunya!", "Susu segar!", "Moo?", "Rileks la bro."],
-    bird: ["Cuit cuit!", "Tinggi langit ni!", "Fly high!", "Cuit!", "Ada guli kat bawah?"],
     monkey: ["Uuak uuak!", "Ada pisang?", "Kera sakti!", "Uuak!", "Aku nak guli tu!"]
 };
 
@@ -106,9 +105,20 @@ export class World {
         this.createCow(-45, -2);
         this.createBird(-10, 8); // Flying bird
         this.createBird(15, 6);
-        this.createMonkey(45, -3); // Near houses/trees
-        this.createMonkey(-15, -4);
 
+        // Monkeys: some on ground, some on trees/houses
+        this.createMonkey(45, -3); // Ground
+        this.createMonkey(-15, -4); // Ground
+        this.createMonkey(-10, -2, 4.5, 'climber'); // On Tok Aki's house/nearby roof
+        this.createMonkey(10, -3, 4.5, 'climber'); // On a house
+        this.createMonkey(25, -6, 4.5, 'climber'); // On another house
+
+        // Random monkeys on trees
+        for (let i = 0; i < 3; i++) {
+            const tx = (Math.random() - 0.5) * 80;
+            const tz = -15 - Math.random() * 5;
+            this.createMonkey(tx, tz, 5.5, 'climber'); // On tree canopy height
+        }
         // --- ADDITIONAL NPCs ---
         this.createNPC(-26, 0, 3, "Tok Mat"); // Watching Gasing
         this.createNPC(20, 0, 2, "Kak Long"); // Playing Batu Seremban
@@ -423,9 +433,19 @@ export class World {
         beak.position.set(0, 0.65, 0.3);
         group.add(beak);
 
-        const crest = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.1, 0.1), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
-        crest.position.set(0, 0.85, 0.15);
+        const crest = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.12, 0.15), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+        crest.position.set(0, 0.85, 0.1);
         group.add(crest);
+
+        // Legs
+        const legGeom = new THREE.BoxGeometry(0.05, 0.3, 0.05);
+        const legMat = new THREE.MeshStandardMaterial({ color: 0xffaa00 });
+        const legL = new THREE.Mesh(legGeom, legMat);
+        legL.position.set(0.1, 0.15, 0);
+        group.add(legL);
+        const legR = new THREE.Mesh(legGeom, legMat);
+        legR.position.set(-0.1, 0.15, 0);
+        group.add(legR);
 
         group.position.set(x, 0, z);
         this.scene.add(group);
@@ -456,6 +476,21 @@ export class World {
         earR.position.set(-0.08, 0.6, 0.25);
         group.add(earR);
 
+        // Tail
+        const tail = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.4), new THREE.MeshStandardMaterial({ color: 0xff9800 }));
+        tail.position.set(0, 0.4, -0.4);
+        tail.rotation.x = 0.5;
+        group.add(tail);
+
+        // Legs
+        const legMat = new THREE.MeshStandardMaterial({ color: 0xff9800 });
+        const legGeom = new THREE.BoxGeometry(0.08, 0.2, 0.08);
+        [[-0.1, 0.1, 0.2], [0.1, 0.1, 0.2], [-0.1, 0.1, -0.2], [0.1, 0.1, -0.2]].forEach(p => {
+            const leg = new THREE.Mesh(legGeom, legMat);
+            leg.position.set(p[0], p[1], p[2]);
+            group.add(leg);
+        });
+
         group.position.set(x, 0, z);
         group.rotation.y = Math.random() * Math.PI * 2;
         this.scene.add(group);
@@ -479,6 +514,26 @@ export class World {
         head.position.set(0, 0.5, 0.35);
         group.add(head);
 
+        // Ears
+        const earGeom = new THREE.BoxGeometry(0.1, 0.2, 0.05);
+        const earL = new THREE.Mesh(earGeom, new THREE.MeshStandardMaterial({ color: 0x333333 }));
+        earL.position.set(0.12, 0.6, 0.35);
+        earL.rotation.z = 0.4;
+        group.add(earL);
+        const earR = new THREE.Mesh(earGeom, new THREE.MeshStandardMaterial({ color: 0x333333 }));
+        earR.position.set(-0.12, 0.6, 0.35);
+        earR.rotation.z = -0.4;
+        group.add(earR);
+
+        // Legs
+        const legGeom = new THREE.BoxGeometry(0.12, 0.3, 0.12);
+        const lMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+        [[-0.15, 0.15, 0.2], [0.15, 0.15, 0.2], [-0.15, 0.15, -0.2], [0.15, 0.15, -0.2]].forEach(p => {
+            const leg = new THREE.Mesh(legGeom, lMat);
+            leg.position.set(p[0], p[1], p[2]);
+            group.add(leg);
+        });
+
         group.position.set(x, 0, z);
         this.scene.add(group);
         this.animals.push({ mesh: group, velocity: new THREE.Vector3(), timer: 0, type: 'sheep' });
@@ -499,6 +554,29 @@ export class World {
         head.position.set(0, 0.8, 0.7);
         group.add(head);
 
+        const snout = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.2, 0.2), new THREE.MeshStandardMaterial({ color: 0xffcccc }));
+        snout.position.set(0, 0.7, 0.9);
+        group.add(snout);
+
+        // Horns
+        const hornGeom = new THREE.BoxGeometry(0.08, 0.25, 0.08);
+        const hMat = new THREE.MeshStandardMaterial({ color: 0xdddddd });
+        const hL = new THREE.Mesh(hornGeom, hMat);
+        hL.position.set(0.15, 1.05, 0.7);
+        group.add(hL);
+        const hR = new THREE.Mesh(hornGeom, hMat);
+        hR.position.set(-0.15, 1.05, 0.7);
+        group.add(hR);
+
+        // Legs
+        const legGeom = new THREE.BoxGeometry(0.2, 0.5, 0.2);
+        const lMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        [[-0.3, 0.25, 0.4], [0.3, 0.25, 0.4], [-0.3, 0.25, -0.4], [0.3, 0.25, -0.4]].forEach(p => {
+            const leg = new THREE.Mesh(legGeom, lMat);
+            leg.position.set(p[0], p[1], p[2]);
+            group.add(leg);
+        });
+
         group.position.set(x, 0, z);
         this.scene.add(group);
         this.animals.push({ mesh: group, velocity: new THREE.Vector3(), timer: 0, type: 'cow' });
@@ -514,12 +592,21 @@ export class World {
         wings.position.set(0, body.position.y, 0);
         group.add(wings);
 
+        const tail = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.02, 0.15), new THREE.MeshStandardMaterial({ color: 0x3333ff }));
+        tail.position.set(0, body.position.y, -0.15);
+        group.add(tail);
+
+        const beak = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.08, 4), new THREE.MeshStandardMaterial({ color: 0xffdd00 }));
+        beak.rotation.x = -Math.PI / 2;
+        beak.position.set(0, body.position.y, 0.15);
+        group.add(beak);
+
         group.position.set(x, 0, z);
         this.scene.add(group);
         this.animals.push({ mesh: group, velocity: new THREE.Vector3(), timer: 0, type: 'bird', baseHeight: body.position.y });
     }
 
-    createMonkey(x, z) {
+    createMonkey(x, z, y = 0, subType = 'ground') {
         const group = new THREE.Group();
         const body = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.4, 0.25), new THREE.MeshStandardMaterial({ color: 0x8b4513 }));
         body.position.y = 0.35;
@@ -529,9 +616,51 @@ export class World {
         head.position.set(0, 0.6, 0);
         group.add(head);
 
-        group.position.set(x, 0, z);
+        // Ears
+        const eGeom = new THREE.BoxGeometry(0.08, 0.08, 0.04);
+        const eL = new THREE.Mesh(eGeom, new THREE.MeshStandardMaterial({ color: 0x8b4513 }));
+        eL.position.set(0.12, 0.65, 0);
+        group.add(eL);
+        const eR = new THREE.Mesh(eGeom, new THREE.MeshStandardMaterial({ color: 0x8b4513 }));
+        eR.position.set(-0.12, 0.65, 0);
+        group.add(eR);
+
+        // Tail
+        const tail = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.03, 8, 8, Math.PI), new THREE.MeshStandardMaterial({ color: 0x8b4513 }));
+        tail.position.set(0, 0.45, -0.15);
+        tail.rotation.y = Math.PI / 2;
+        group.add(tail);
+
+        // Arms & Legs
+        const limbGeom = new THREE.BoxGeometry(0.08, 0.35, 0.08);
+        const lMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+        // Legs
+        const legL = new THREE.Mesh(limbGeom, lMat);
+        legL.position.set(0.1, 0.15, 0);
+        group.add(legL);
+        const legR = new THREE.Mesh(limbGeom, lMat);
+        legR.position.set(-0.1, 0.15, 0);
+        group.add(legR);
+        // Arms
+        const armL = new THREE.Mesh(limbGeom, lMat);
+        armL.position.set(0.15, 0.45, 0.1);
+        armL.rotation.x = -0.5;
+        group.add(armL);
+        const armR = new THREE.Mesh(limbGeom, lMat);
+        armR.position.set(-0.15, 0.45, 0.1);
+        armR.rotation.x = -0.5;
+        group.add(armR);
+
+        group.position.set(x, y, z);
         this.scene.add(group);
-        this.animals.push({ mesh: group, velocity: new THREE.Vector3(), timer: 0, type: 'monkey' });
+        this.animals.push({
+            mesh: group,
+            velocity: new THREE.Vector3(),
+            timer: 0,
+            type: 'monkey',
+            subType: subType,
+            baseY: y
+        });
     }
 
     update(dt, camera, player) {
@@ -553,11 +682,13 @@ export class World {
             }
 
             // Move
-            animal.mesh.position.add(animal.velocity);
+            if (animal.subType !== 'climber') {
+                animal.mesh.position.add(animal.velocity);
 
-            // Boundary check
-            if (Math.abs(animal.mesh.position.x) > 50) animal.velocity.x *= -1;
-            if (Math.abs(animal.mesh.position.z) > 15) animal.velocity.z *= -1;
+                // Boundary check
+                if (Math.abs(animal.mesh.position.x) > 50) animal.velocity.x *= -1;
+                if (Math.abs(animal.mesh.position.z) > 15) animal.velocity.z *= -1;
+            }
 
             // ANIMATIONS
             if (animal.type === 'chicken') {
@@ -570,13 +701,15 @@ export class World {
                 animal.mesh.position.y = animal.baseHeight + Math.sin(Date.now() * 0.005) * 0.5;
             }
             if (animal.type === 'monkey') {
-                // Small hops
-                animal.mesh.position.y = Math.abs(Math.sin(Date.now() * 0.015)) * 0.3;
+                // Subtle hops for ground, tiny fidgeting for climbers
+                const hopHeight = animal.subType === 'climber' ? 0.05 : 0.15;
+                const hopSpeed = animal.subType === 'climber' ? 0.005 : 0.012;
+                animal.mesh.position.y = animal.baseY + Math.abs(Math.sin(Date.now() * hopSpeed)) * hopHeight;
             }
 
             // TOOLTIP LOGIC
             const dist = player.mesh.position.distanceTo(animal.mesh.position);
-            if (dist < 5) {
+            if (dist < 5 && animal.type !== 'bird') {
                 this.showAnimalBubble(animal, camera);
             } else {
                 this.hideAnimalBubble(animal);
