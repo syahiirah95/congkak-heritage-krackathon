@@ -50,10 +50,10 @@ export class World {
             this.createHouse(pos.x, pos.z);
         });
 
-        // RANDOM HIDING SPOTS EVERYWHERE (Not just bushes/houses)
-        for (let i = 0; i < 40; i++) {
-            const rx = (Math.random() - 0.5) * 100;
-            const rz = (Math.random() - 0.5) * 20;
+        // RANDOM HIDING SPOTS EVERYWHERE
+        for (let i = 0; i < 120; i++) {
+            const rx = (Math.random() - 0.5) * 120;
+            const rz = (Math.random() - 0.5) * 30;
             this.hidingSpots.push(new THREE.Vector3(rx, 0.5, rz));
         }
 

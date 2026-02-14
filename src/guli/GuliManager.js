@@ -56,9 +56,22 @@ export class GuliManager {
 
     createGuli(x, y, z, type) {
         const group = new THREE.Group();
+        const typeColors = {
+            blue: 0x00f2ff,
+            yellow: 0xffe600,
+            red: 0xff3333,
+            white: 0xffffff
+        };
         const mesh = new THREE.Mesh(
             new THREE.SphereGeometry(0.3, 16, 16),
-            new THREE.MeshStandardMaterial({ map: this.textures[type], metalness: 0.1, roughness: 0.2 })
+            new THREE.MeshStandardMaterial({
+                map: this.textures[type],
+                color: typeColors[type],
+                emissive: typeColors[type],
+                emissiveIntensity: 0.3, // Brighten up dark spots in texture
+                metalness: 0.4,
+                roughness: 0.1
+            })
         );
         mesh.castShadow = true;
         group.add(mesh);

@@ -329,8 +329,7 @@ class Game {
         this.guliManager.targetScore = level.target;
         this.guliManager.goalMet = false; // Reset for new level
         this.guliManager.updateHUD();
-        this.guliManager.spawn(12, level.types);
-
+        this.guliManager.spawn(40, level.types);
         this.congkakBoard.hide();
         document.getElementById('congkak-2d-overlay').classList.add('hidden');
         this.player.mesh.position.set(0, 0, 0);
