@@ -3,7 +3,11 @@ import { NPC } from './NPC.js';
 
 const ANIMAL_QUOTES = {
     chicken: ["Kwek! Kwek!", "Tok Aki ada guli?", "Mana cacing ni...", "Kwek?", "Jom main Congkak!"],
-    cat: ["Meow~", "Nak ikan...", "Purrr...", "Tepi sikit, aku nak tidur.", "Miau!"]
+    cat: ["Meow~", "Nak ikan...", "Purrr...", "Tepi sikit, aku nak tidur.", "Miau!"],
+    sheep: ["Mbeee!", "Rumput sedap!", "Mana kambing lain?", "Mbeee~", "Kite geng Tok Aki!"],
+    cow: ["Moooo!", "Lembunya!", "Susu segar!", "Moo?", "Rileks la bro."],
+    bird: ["Cuit cuit!", "Tinggi langit ni!", "Fly high!", "Cuit!", "Ada guli kat bawah?"],
+    monkey: ["Uuak uuak!", "Ada pisang?", "Kera sakti!", "Uuak!", "Aku nak guli tu!"]
 };
 
 export class World {
@@ -92,10 +96,18 @@ export class World {
 
         // --- NEW CONTENT: ANIMALS ---
         this.createChicken(-12, 3);
-        this.createChicken(-14, 4);
+        this.createChicken(-30, 4);
         this.createChicken(22, 2);
         this.createCat(8, -2);
         this.createCat(-35, -1);
+        this.createSheep(-20, 2);
+        this.createSheep(-25, -1);
+        this.createCow(30, 1);
+        this.createCow(-45, -2);
+        this.createBird(-10, 8); // Flying bird
+        this.createBird(15, 6);
+        this.createMonkey(45, -3); // Near houses/trees
+        this.createMonkey(-15, -4);
 
         // --- ADDITIONAL NPCs ---
         this.createNPC(-26, 0, 3, "Tok Mat"); // Watching Gasing
@@ -457,16 +469,87 @@ export class World {
         });
     }
 
+    createSheep(x, z) {
+        const group = new THREE.Group();
+        const wool = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.6), new THREE.MeshStandardMaterial({ color: 0xeeeeee }));
+        wool.position.y = 0.4;
+        group.add(wool);
+
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.2), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+        head.position.set(0, 0.5, 0.35);
+        group.add(head);
+
+        group.position.set(x, 0, z);
+        this.scene.add(group);
+        this.animals.push({ mesh: group, velocity: new THREE.Vector3(), timer: 0, type: 'sheep' });
+    }
+
+    createCow(x, z) {
+        const group = new THREE.Group();
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.7, 1.2), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+        body.position.y = 0.6;
+        group.add(body);
+
+        // Spots
+        const spot = new THREE.Mesh(new THREE.BoxGeometry(0.81, 0.4, 0.4), new THREE.MeshStandardMaterial({ color: 0x333333 }));
+        spot.position.y = 0.7;
+        body.add(spot);
+
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.3), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+        head.position.set(0, 0.8, 0.7);
+        group.add(head);
+
+        group.position.set(x, 0, z);
+        this.scene.add(group);
+        this.animals.push({ mesh: group, velocity: new THREE.Vector3(), timer: 0, type: 'cow' });
+    }
+
+    createBird(x, z) {
+        const group = new THREE.Group();
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 0.2), new THREE.MeshStandardMaterial({ color: 0x3333ff }));
+        body.position.y = 3 + Math.random() * 2; // Fly high
+        group.add(body);
+
+        const wings = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.02, 0.1), new THREE.MeshStandardMaterial({ color: 0x5555ff }));
+        wings.position.set(0, body.position.y, 0);
+        group.add(wings);
+
+        group.position.set(x, 0, z);
+        this.scene.add(group);
+        this.animals.push({ mesh: group, velocity: new THREE.Vector3(), timer: 0, type: 'bird', baseHeight: body.position.y });
+    }
+
+    createMonkey(x, z) {
+        const group = new THREE.Group();
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.4, 0.25), new THREE.MeshStandardMaterial({ color: 0x8b4513 }));
+        body.position.y = 0.35;
+        group.add(body);
+
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 0.2), new THREE.MeshStandardMaterial({ color: 0xcd853f }));
+        head.position.set(0, 0.6, 0);
+        group.add(head);
+
+        group.position.set(x, 0, z);
+        this.scene.add(group);
+        this.animals.push({ mesh: group, velocity: new THREE.Vector3(), timer: 0, type: 'monkey' });
+    }
+
     update(dt, camera, player) {
         this.animals.forEach(animal => {
             animal.timer -= dt;
+            // Movement speeds
+            let speed = 0.03;
+            if (animal.type === 'chicken') speed = 0.05;
+            if (animal.type === 'cow') speed = 0.02;
+            if (animal.type === 'bird') speed = 0.08;
+            if (animal.type === 'monkey') speed = 0.07;
+
             if (animal.timer <= 0) {
                 // Change direction
                 const angle = Math.random() * Math.PI * 2;
                 animal.mesh.rotation.y = angle;
-                const speed = animal.type === 'chicken' ? 0.05 : 0.03;
                 animal.velocity.set(Math.sin(angle) * speed, 0, Math.cos(angle) * speed);
-                animal.timer = 1 + Math.random() * 3; // Move for 1-4 seconds
+                animal.timer = 1 + Math.random() * 3;
             }
 
             // Move
@@ -476,9 +559,19 @@ export class World {
             if (Math.abs(animal.mesh.position.x) > 50) animal.velocity.x *= -1;
             if (Math.abs(animal.mesh.position.z) > 15) animal.velocity.z *= -1;
 
-            // Simple "walking" bob
+            // ANIMATIONS
             if (animal.type === 'chicken') {
                 animal.mesh.position.y = Math.abs(Math.sin(Date.now() * 0.01)) * 0.1;
+            }
+            if (animal.type === 'bird') {
+                // Flapping wings and wavy flight
+                const wings = animal.mesh.children[1];
+                if (wings) wings.rotation.z = Math.sin(Date.now() * 0.02) * 0.5;
+                animal.mesh.position.y = animal.baseHeight + Math.sin(Date.now() * 0.005) * 0.5;
+            }
+            if (animal.type === 'monkey') {
+                // Small hops
+                animal.mesh.position.y = Math.abs(Math.sin(Date.now() * 0.015)) * 0.3;
             }
 
             // TOOLTIP LOGIC
