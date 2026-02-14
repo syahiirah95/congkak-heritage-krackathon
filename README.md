@@ -19,17 +19,29 @@
 
 ---
 
-## 🚀 Vibe Coding & AI Tech Stack
+## 🚀 The Vibe Coding Tech Stack
 
-This project was developed using a **Vibe Coding** approach, leveraging state-of-the-art AI agents and tools.
+This project was developed using a cutting-edge **Vibe Coding** workflow, combining advanced AI agency with modern web technologies.
 
+### 🤖 AI Agentic Workflow
+| Component | Technology | Role |
+| :--- | :--- | :--- |
+| **Agentic IDE** | **Antigravity** | Orchestrating complex code edits and world building. |
+| **Brain (Logic)** | **Claude 3.5 Sonnet / Opus 4.6** | Algorithm design, Congkak engine logic, and AI strategy. |
+| **Brain (Speed)** | **Gemini 2.0 Flash / 3 Flash** | Rapid prototyping, UI adjustments, and system optimization. |
+| **Art (Gen)** | **FLUX.1 [dev]** | Realistic textures, character portraits, and UI textures. |
+| **Art (Polish)** | **Canva** | Background removal, retouching, and asset composition. |
+
+### 💻 Development & Runtime
 | Component | Technology | Detail |
 | :--- | :--- | :--- |
-| **IDE** | **Antigravity** | Advanced agentic coding environment. |
-| **Primary LLMs** | **Gemini 3 Flash & Claude Opus 4.6** | Logic, math, and engine architecture. |
-| **Asset Generation** | **FLUX.1 [dev]** | High-quality textures and character portraits. |
-| **Asset Refinement** | **Canva** | Cleaning, background removal, and asset refinement. |
-| **3D Engine** | **Three.js** | Core 3D rendering and world-building. |
+| **3D Rendering** | **Three.js** | Core WebGL engine for the 3D village and board. |
+| **Frontend Tooling**| **Vite** | Lightning-fast build tool and dev server. |
+| **Input System** | **NippleJS** | Robust virtual joystick for mobile 3D navigation. |
+| **Styling** | **Vanilla CSS3** | Custom glassmorphism, RPG typography, and animations. |
+| **Language** | **Modern JavaScript (ES6+)** | Clean, modular, and asynchronous game logic. |
+| **Version Control** | **Git / GitHub** | Source control and collaboration. |
+| **Physics** | **Custom AABB** | Hand-coded Axis-Aligned Bounding Box collision system. |
 
 ---
 
