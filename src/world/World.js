@@ -8,6 +8,7 @@ const ANIMAL_QUOTES = {
 
 export class World {
     constructor(scene) {
+        this.scene = scene;
         this.textureLoader = new THREE.TextureLoader();
         this.props = [];
         this.animals = [];
