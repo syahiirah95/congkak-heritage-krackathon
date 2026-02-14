@@ -98,6 +98,37 @@ export class GuliManager {
     }
 
     collect(guli) {
+        if (guli.isCollecting) return;
+        guli.isCollecting = true;
+
+        // Visual collection sequence
+        const startScale = guli.group.scale.x;
+        const duration = 400; // ms
+        const startTime = Date.now();
+
+        const animateCollection = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Spin faster and shrink
+            guli.group.rotation.y += 0.3;
+            const s = startScale * (1 - progress);
+            guli.group.scale.set(s, s, s);
+
+            if (progress < 1) {
+                requestAnimationFrame(animateCollection);
+            } else {
+                this.finalizeCollection(guli);
+            }
+        };
+
+        // Trigger UI Effects
+        this.triggerRechargeUI();
+
+        requestAnimationFrame(animateCollection);
+    }
+
+    finalizeCollection(guli) {
         guli.collected = true;
         this.scene.remove(guli.group);
 
@@ -107,7 +138,30 @@ export class GuliManager {
         this.updateVault();
         this.updateHUD();
 
+        // Dispatch event for Main.js to handle energy recharge
+        window.dispatchEvent(new CustomEvent('guli-collected', { detail: { type: guli.type } }));
+
         if (this.score >= this.targetScore) window.dispatchEvent(new CustomEvent('guli-goal-met'));
+    }
+
+    triggerRechargeUI() {
+        const flash = document.getElementById('recharge-flash');
+        const popup = document.getElementById('energy-popup');
+
+        if (flash) {
+            flash.classList.remove('animate-recharge');
+            void flash.offsetWidth; // Force reflow
+            flash.classList.add('animate-recharge');
+        }
+
+        if (popup) {
+            popup.classList.remove('animate-popup');
+            void popup.offsetWidth; // Force reflow
+            popup.classList.add('animate-popup');
+            // Randomize position slightly for variety
+            popup.style.left = `${40 + Math.random() * 20}%`;
+            popup.style.top = `${40 + Math.random() * 20}%`;
+        }
     }
 
     updateVault() {

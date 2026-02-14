@@ -138,6 +138,10 @@ class Game {
             this.updateCongkakUI();
         });
 
+        window.addEventListener('guli-collected', (e) => {
+            this.addEnergy(2); // Recharge energy on collection
+        });
+
         window.addEventListener('click', (e) => this.onPlayerClick(e));
     }
 
