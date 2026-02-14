@@ -281,9 +281,11 @@ canvas#bg {
 }
 
 .quest-list li.completed {
-    opacity: 0.7;
+    opacity: 0.9;
     color: var(--accent2);
-    text-decoration: line-through;
+    border-left-color: var(--accent2);
+    text-decoration: none !important;
+    /* NO STRIKETHROUGH */
 }
 
 
@@ -414,6 +416,34 @@ canvas#bg {
     border-color: var(--primary);
     color: var(--primary-light);
     transform: translateY(-3px);
+}
+
+.nav-btn.btn-play {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-color: var(--primary-light);
+    color: #fff;
+    min-width: 80px;
+    box-shadow: 0 0 15px rgba(255, 184, 0, 0.4);
+    animation: navPulse 2s infinite;
+}
+
+.nav-btn.btn-play .nav-label {
+    color: #fff;
+    font-weight: 900;
+}
+
+@keyframes navPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 184, 0, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 184, 0, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 184, 0, 0);
+    }
 }
 
 .nav-icon {
@@ -1737,11 +1767,17 @@ body.pointer-locked #crosshair {
     opacity: 0.8;
 }
 
-.quest-main {
+.quest-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
     width: 100%;
+}
+
+.quest-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .ready-notif {
@@ -1756,18 +1792,25 @@ body.pointer-locked #crosshair {
 }
 
 .challenge-btn {
-    margin-top: 10px;
-    width: 100%;
-    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    margin: 4px 0 0 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 28px !important;
+    background: linear-gradient(135deg, #ffd700, #ff8c00) !important;
+    background-image: none !important;
     color: #fff !important;
     border: none !important;
-    padding: 8px !important;
-    font-size: 0.8rem !important;
-    font-weight: 800 !important;
-    border-radius: 8px !important;
+    padding: 4px 10px !important;
+    font-family: var(--font-main) !important;
+    font-size: 0.65rem !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    border-radius: 4px !important;
     cursor: pointer !important;
-    box-shadow: 0 4px 10px rgba(255, 140, 0, 0.4) !important;
-    transition: transform 0.2s, box-shadow 0.2s !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.2s !important;
+    display: block !important;
+    text-align: center;
 }
 
 .challenge-btn.hidden {

@@ -133,22 +133,24 @@ class Game {
             }
         });
 
-        // Manual Challenge Start
         const challengeBtn = document.getElementById('start-congkak-btn');
-        if (challengeBtn) {
-            challengeBtn.addEventListener('click', () => {
-                this.gameState = 'CONGKAK';
-                if (document.pointerLockElement) document.exitPointerLock();
-                this.updateUIVisibility();
+        const navPlay = document.getElementById('nav-play');
 
-                this.congkakEngine.reset();
-                this.congkakBoard.show();
-                this.update2DUI(this.congkakEngine.holes);
-                this.updateCongkakUI();
+        const triggerCongkak = () => {
+            this.gameState = 'CONGKAK';
+            if (document.pointerLockElement) document.exitPointerLock();
+            this.updateUIVisibility();
 
-                challengeBtn.classList.add('hidden');
-            });
-        }
+            this.congkakEngine.reset();
+            this.congkakBoard.show();
+            this.update2DUI(this.congkakEngine.holes);
+            this.updateCongkakUI();
+
+            if (challengeBtn) challengeBtn.classList.add('hidden');
+        };
+
+        if (challengeBtn) challengeBtn.addEventListener('click', triggerCongkak);
+        if (navPlay) navPlay.addEventListener('click', triggerCongkak);
         window.addEventListener('guli-collected', (e) => {
             this.addEnergy(2); // Recharge energy on collection
         });
