@@ -1737,6 +1737,65 @@ body.pointer-locked #crosshair {
     opacity: 0.8;
 }
 
+.quest-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.ready-notif {
+    background: #00ff00;
+    color: #000;
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 900;
+    margin-left: auto;
+    animation: missionPulse 1s infinite;
+}
+
+.challenge-btn {
+    margin-top: 10px;
+    width: 100%;
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #fff !important;
+    border: none !important;
+    padding: 8px !important;
+    font-size: 0.8rem !important;
+    font-weight: 800 !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 10px rgba(255, 140, 0, 0.4) !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+}
+
+.challenge-btn.hidden {
+    display: none !important;
+}
+
+.challenge-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 15px rgba(255, 140, 0, 0.6);
+}
+
+@keyframes missionPulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
 @media (max-width: 1000px) {
     .hole-2d {
         width: 45px;

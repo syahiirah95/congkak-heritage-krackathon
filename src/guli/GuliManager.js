@@ -7,6 +7,7 @@ export class GuliManager {
         this.congkakEngine = congkakEngine;
         this.world = world;
         this.textureLoader = new THREE.TextureLoader();
+        this.goalMet = false;
         this.gulis = [];
         this.score = 0;
         this.targetScore = 10;
@@ -141,7 +142,10 @@ export class GuliManager {
         // Dispatch event for Main.js to handle energy recharge
         window.dispatchEvent(new CustomEvent('guli-collected', { detail: { type: guli.type } }));
 
-        if (this.score >= this.targetScore) window.dispatchEvent(new CustomEvent('guli-goal-met'));
+        if (this.score >= this.targetScore && !this.goalMet) {
+            this.goalMet = true;
+            window.dispatchEvent(new CustomEvent('guli-goal-met'));
+        }
     }
 
     triggerRechargeUI() {

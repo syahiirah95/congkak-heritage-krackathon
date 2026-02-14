@@ -121,23 +121,34 @@ class Game {
         });
 
         window.addEventListener('guli-goal-met', () => {
-            this.gameState = 'CONGKAK';
-            if (document.pointerLockElement) document.exitPointerLock();
-            this.updateUIVisibility();
+            const btn = document.getElementById('start-congkak-btn');
+            const indicator = document.getElementById('guli-ready-indicator');
+            if (btn) btn.classList.remove('hidden');
+            if (indicator) indicator.classList.remove('hidden');
 
             // Mark quest as done
             const q = document.getElementById('quest-guli');
             if (q) {
-                q.classList.remove('active');
                 q.classList.add('completed');
             }
-
-            this.congkakEngine.reset();
-            this.congkakBoard.show();
-            this.update2DUI(this.congkakEngine.holes);
-            this.updateCongkakUI();
         });
 
+        // Manual Challenge Start
+        const challengeBtn = document.getElementById('start-congkak-btn');
+        if (challengeBtn) {
+            challengeBtn.addEventListener('click', () => {
+                this.gameState = 'CONGKAK';
+                if (document.pointerLockElement) document.exitPointerLock();
+                this.updateUIVisibility();
+
+                this.congkakEngine.reset();
+                this.congkakBoard.show();
+                this.update2DUI(this.congkakEngine.holes);
+                this.updateCongkakUI();
+
+                challengeBtn.classList.add('hidden');
+            });
+        }
         window.addEventListener('guli-collected', (e) => {
             this.addEnergy(2); // Recharge energy on collection
         });
@@ -316,12 +327,18 @@ class Game {
 
         this.guliManager.score = 0;
         this.guliManager.targetScore = level.target;
+        this.guliManager.goalMet = false; // Reset for new level
         this.guliManager.updateHUD();
         this.guliManager.spawn(12, level.types);
 
         this.congkakBoard.hide();
         document.getElementById('congkak-2d-overlay').classList.add('hidden');
         this.player.mesh.position.set(0, 0, 0);
+
+        const btn = document.getElementById('start-congkak-btn');
+        const indicator = document.getElementById('guli-ready-indicator');
+        if (btn) btn.classList.add('hidden');
+        if (indicator) indicator.classList.add('hidden');
 
         // Reset quest UI
         const q = document.getElementById('quest-guli');
