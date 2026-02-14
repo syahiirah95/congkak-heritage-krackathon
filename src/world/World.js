@@ -14,6 +14,10 @@ export class World {
         this.animals = [];
         this.hidingSpots = []; // Positions for guli
         this.animalBubbles = new Map(); // Store DOM elements for bubbles
+
+        // Clean up any stale bubbles from HMR
+        document.querySelectorAll('.animal-bubble').forEach(el => el.remove());
+
         this.generateBaseWorld();
     }
 
@@ -488,18 +492,28 @@ export class World {
     }
 
     showAnimalBubble(animal, camera) {
-        if (!this.animalBubbles.has(animal)) {
-            const bubble = document.createElement('div');
-            bubble.className = 'animal-bubble';
+        let bubbleData = this.animalBubbles.get(animal);
+
+        if (!bubbleData) {
+            const el = document.createElement('div');
+            el.className = 'animal-bubble';
             const quotes = ANIMAL_QUOTES[animal.type];
-            bubble.textContent = quotes[Math.floor(Math.random() * quotes.length)];
-            document.body.appendChild(bubble);
-            this.animalBubbles.set(animal, bubble);
+            el.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+            document.body.appendChild(el);
+
+            bubbleData = { el, isHiding: false, timeout: null };
+            this.animalBubbles.set(animal, bubbleData);
         }
 
-        const bubble = this.animalBubbles.get(animal);
+        if (bubbleData.isHiding) {
+            bubbleData.isHiding = false;
+            if (bubbleData.timeout) {
+                clearTimeout(bubbleData.timeout);
+                bubbleData.timeout = null;
+            }
+        }
 
-        // Project 3D position to 2D screen
+        const bubble = bubbleData.el;
         const pos = animal.mesh.position.clone().add(new THREE.Vector3(0, 1.2, 0));
         pos.project(camera);
 
@@ -509,14 +523,17 @@ export class World {
         bubble.style.left = `${x}px`;
         bubble.style.top = `${y}px`;
         bubble.style.opacity = '1';
+        bubble.style.display = 'block';
     }
 
     hideAnimalBubble(animal) {
-        if (this.animalBubbles.has(animal)) {
-            const bubble = this.animalBubbles.get(animal);
-            bubble.style.opacity = '0';
-            setTimeout(() => {
-                if (bubble.parentElement) bubble.remove();
+        const bubbleData = this.animalBubbles.get(animal);
+        if (bubbleData && !bubbleData.isHiding) {
+            bubbleData.isHiding = true;
+            bubbleData.el.style.opacity = '0';
+
+            bubbleData.timeout = setTimeout(() => {
+                if (bubbleData.el.parentElement) bubbleData.el.remove();
                 this.animalBubbles.delete(animal);
             }, 300);
         }
