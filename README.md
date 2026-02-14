@@ -37,10 +37,10 @@ This project was developed using a cutting-edge **Vibe Coding** workflow, combin
 | :--- | :--- | :--- |
 | **3D Rendering** | **Three.js** | Core WebGL engine for the 3D village and board. |
 | **Frontend Tooling**| **Vite** | Lightning-fast build tool and dev server. |
-| **Input System** | **NippleJS** | Robust virtual joystick for mobile 3D navigation. |
 | **Styling** | **Vanilla CSS3** | Custom glassmorphism, RPG typography, and animations. |
 | **Language** | **Modern JavaScript (ES6+)** | Clean, modular, and asynchronous game logic. |
 | **Version Control** | **Git / GitHub** | Source control and collaboration. |
+| **Physics** | **Custom AABB** | Hand-coded Axis-Aligned Bounding Box collision system. |
 
 ---
 
@@ -61,6 +61,14 @@ This project was developed using a cutting-edge **Vibe Coding** workflow, combin
 | **Special Seeds** | 🟡 Gold (2x Score) and 🔵 Blue (Immediate Extra Turn). |
 | **AI Opponent** | **Tok Aki**: A strategic AI that calculates optimal moves. |
 | **Visuals** | Animated 3D seeds and dynamic hole highlighting. |
+
+### 📱 Premium UI/UX
+| Element | Description |
+| :--- | :--- |
+| **Keyboard Controls**| Intuitive WASD + Space movement and mouse look. |
+| **RPG HUD** | Top status bar for Energy, Coins, Gulis, and XP. |
+| **World Map** | Level selection with a winding path and star ratings. |
+| **Navigation** | Seamless transitions between Story, Explore, and Board modes. |
 
 ---
 

@@ -52,9 +52,9 @@ export class World {
             this.createLowPolyTree(tx, tz);
         }
 
-        // Bounty Board & Tok Aki: Center of the path
-        this.createBountyBoard(0, 0, 0);
-        this.createNPC(1.5, 0, 0);
+        // Bounty Board & Tok Aki: Moved away from center to clear the path
+        this.createBountyBoard(-4, 0, -2);
+        this.createNPC(4, 0, -2);
 
         // Bushes (Hiding spots near the path)
         for (let i = 0; i < 15; i++) {
@@ -69,6 +69,23 @@ export class World {
         this.createDirtPaths();
         this.createWell(-5, -5);
         this.createLanterns();
+
+        // --- NEW CONTENT: TRADITIONAL GAME SCENES ---
+        this.createGasingArena(-28, 2);
+        this.createBatuSerembanArena(18, 1);
+        this.createWauDisplay(35, -4);
+
+        // --- NEW CONTENT: ANIMALS ---
+        this.createChicken(-12, 3);
+        this.createChicken(-14, 4);
+        this.createChicken(22, 2);
+        this.createCat(8, -2);
+        this.createCat(-35, -1);
+
+        // --- ADDITIONAL NPCs ---
+        this.createNPC(-26, 0, 3, "Tok Mat"); // Watching Gasing
+        this.createNPC(20, 0, 2, "Kak Long"); // Playing Batu Seremban
+        this.createNPC(38, 0, -3, "Pak Abu"); // Fixing Wau
     }
 
     createSky() {
@@ -143,15 +160,16 @@ export class World {
         this.props.push(group);
     }
 
-    createNPC(x, y, z) {
-        const tokAki = new NPC(this.scene, this.textureLoader, {
+    createNPC(x, y, z, name = "Tok Aki") {
+        const npc = new NPC(this.scene, this.textureLoader, {
             position: new THREE.Vector3(x, y, z),
-            facePath: '/assets/textures/player/tok_aki_face.png',
-            shirtPath: '/assets/textures/player/player_shirt.png', // Or a custom aged one if available
+            facePath: name === "Tok Aki" ? '/assets/textures/player/tok_aki_face.png' : '/assets/textures/player/player_face.png',
+            shirtPath: '/assets/textures/player/player_shirt.png',
             skinPath: '/assets/textures/player/player_skin.png',
             pantsPath: '/assets/textures/player/player_pants.png'
         });
-        this.props.push(tokAki.mesh);
+        this.props.push(npc.mesh);
+        return npc;
     }
 
     createBountyBoard(x, y, z) {
@@ -205,7 +223,7 @@ export class World {
         const bush = new THREE.Mesh(new THREE.IcosahedronGeometry(0.7, 0), mat);
         bush.position.set(x, 0.35, z);
         this.scene.add(bush);
-        this.props.push(bush);
+        // Removed from this.props to allow player to walk through (easier collection)
     }
 
     createDirtPaths() {
@@ -268,5 +286,145 @@ export class World {
             this.scene.add(group);
             this.props.push(group);
         });
+    }
+
+    // --- NEW TRADITIONAL GAME SCENES ---
+
+    createGasingArena(x, z) {
+        const group = new THREE.Group();
+        // Dirt circle
+        const circle = new THREE.Mesh(
+            new THREE.CircleGeometry(3, 32),
+            new THREE.MeshStandardMaterial({ color: 0x8b4513, roughness: 1 })
+        );
+        circle.rotation.x = -Math.PI / 2;
+        circle.position.y = 0.02;
+        group.add(circle);
+
+        // Gasings (Cones)
+        const gasingGeo = new THREE.ConeGeometry(0.3, 0.4, 8);
+        const colors = [0xffd700, 0x8b4513, 0xff0000];
+        for (let i = 0; i < 3; i++) {
+            const gasingTop = new THREE.Mesh(gasingGeo, new THREE.MeshStandardMaterial({ color: colors[i] }));
+            const gasingBottom = new THREE.Mesh(gasingGeo, new THREE.MeshStandardMaterial({ color: colors[i] }));
+            gasingBottom.rotation.x = Math.PI;
+
+            const gasingGroup = new THREE.Group();
+            gasingGroup.add(gasingTop);
+            gasingGroup.add(gasingBottom);
+            gasingGroup.position.set((Math.random() - 0.5) * 3, 0.3, (Math.random() - 0.5) * 3);
+            gasingGroup.rotation.z = Math.random() * 0.2;
+            group.add(gasingGroup);
+        }
+
+        group.position.set(x, 0, z);
+        this.scene.add(group);
+        this.props.push(group);
+    }
+
+    createBatuSerembanArena(x, z) {
+        const group = new THREE.Group();
+        // Mat (Tikar)
+        const mat = new THREE.Mesh(
+            new THREE.PlaneGeometry(2, 2),
+            new THREE.MeshStandardMaterial({ color: 0xdaa520, roughness: 1 })
+        );
+        mat.rotation.x = -Math.PI / 2;
+        mat.position.y = 0.02;
+        group.add(mat);
+
+        // Small cubes (The stones/seeds)
+        const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xffffff];
+        for (let i = 0; i < 5; i++) {
+            const stone = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.1, 0.1),
+                new THREE.MeshStandardMaterial({ color: colors[i] })
+            );
+            stone.position.set((Math.random() - 0.5) * 1.5, 0.1, (Math.random() - 0.5) * 1.5);
+            group.add(stone);
+        }
+
+        group.position.set(x, 0, z);
+        this.scene.add(group);
+        this.props.push(group);
+    }
+
+    createWauDisplay(x, z) {
+        const group = new THREE.Group();
+        // Vertical post
+        const pole = new THREE.Mesh(new THREE.BoxGeometry(0.1, 4, 0.1), new THREE.MeshStandardMaterial({ color: 0x4d2911 }));
+        pole.position.y = 2;
+        group.add(pole);
+
+        // Wau Bulan (The Kite)
+        const wauGroup = new THREE.Group();
+        const wing = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.05, 8, 4), new THREE.MeshStandardMaterial({ color: 0xff4444 }));
+        wing.scale.set(1.5, 1, 1);
+        wauGroup.add(wing);
+
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.8, 0.05), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+        wauGroup.add(body);
+
+        const crescent = new THREE.Mesh(new THREE.TorusGeometry(0.8, 0.1, 12, 12, Math.PI), new THREE.MeshStandardMaterial({ color: 0xffd700 }));
+        crescent.position.y = -0.5;
+        crescent.rotation.z = Math.PI;
+        wauGroup.add(crescent);
+
+        wauGroup.position.y = 2.5;
+        wauGroup.rotation.z = Math.PI / 4;
+        group.add(wauGroup);
+
+        group.position.set(x, 0, z);
+        this.scene.add(group);
+        this.props.push(group);
+    }
+
+    // --- ANIMALS ---
+
+    createChicken(x, z) {
+        const group = new THREE.Group();
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.45), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+        body.position.y = 0.45;
+        group.add(body);
+
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.25, 0.2), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+        head.position.set(0, 0.7, 0.15);
+        group.add(head);
+
+        const beak = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.1, 4), new THREE.MeshStandardMaterial({ color: 0xffaa00 }));
+        beak.rotation.x = -Math.PI / 2;
+        beak.position.set(0, 0.65, 0.3);
+        group.add(beak);
+
+        const crest = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.1, 0.1), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
+        crest.position.set(0, 0.85, 0.15);
+        group.add(crest);
+
+        group.position.set(x, 0, z);
+        this.scene.add(group);
+        // Removed from this.props to allow player movement
+    }
+
+    createCat(x, z) {
+        const group = new THREE.Group();
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.5), new THREE.MeshStandardMaterial({ color: 0xff9800 })); // Ginger cat
+        body.position.y = 0.25;
+        group.add(body);
+
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.2), new THREE.MeshStandardMaterial({ color: 0xff9800 }));
+        head.position.set(0, 0.45, 0.25);
+        group.add(head);
+
+        const earL = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.15, 3), new THREE.MeshStandardMaterial({ color: 0xff9800 }));
+        earL.position.set(0.08, 0.6, 0.25);
+        group.add(earL);
+        const earR = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.15, 3), new THREE.MeshStandardMaterial({ color: 0xff9800 }));
+        earR.position.set(-0.08, 0.6, 0.25);
+        group.add(earR);
+
+        group.position.set(x, 0, z);
+        group.rotation.y = Math.random() * Math.PI * 2;
+        this.scene.add(group);
+        // Removed from this.props to allow player movement
     }
 }

@@ -79,8 +79,21 @@ export class GuliManager {
 
         this.gulis.forEach(g => {
             if (g.collected) return;
-            g.group.position.y = 0.5 + Math.sin(time + g.bobPhase) * 0.15;
-            if (p.distanceTo(g.group.position) < 1.5) this.collect(g);
+
+            // Bobbing animation
+            g.group.position.y = 0.6 + Math.sin(time + g.bobPhase) * 0.2;
+            g.group.rotation.y += 0.02;
+
+            const dist = p.distanceTo(g.group.position);
+
+            // Magnet Effect: Pull guli towards player when close
+            if (dist < 3.5) {
+                const pullDir = new THREE.Vector3().subVectors(p, g.group.position).normalize();
+                g.group.position.addScaledVector(pullDir, 0.15);
+            }
+
+            // Collection
+            if (dist < 2.2) this.collect(g);
         });
     }
 

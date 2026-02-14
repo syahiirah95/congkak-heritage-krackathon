@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import nipplejs from 'nipplejs';
 
 export class Player {
     constructor(scene, camera) {
@@ -10,6 +9,7 @@ export class Player {
         // Player Group
         this.mesh = new THREE.Group();
         this.createHumanoid();
+        this.mesh.position.set(0, 0, 5); // Start away from board/NPCs
         this.scene.add(this.mesh);
 
         // Movement state
@@ -17,7 +17,6 @@ export class Player {
         this.speed = 0.15;
         this.baseSpeed = 0.15;
         this.rotationSpeed = 0.003;
-        this.joystickInput = { x: 0, y: 0 };
 
         // Physics/Minecraft-style
         this.velocity = new THREE.Vector3();
@@ -39,7 +38,6 @@ export class Player {
         this.isMouseDown = false;
 
         this.initInput();
-        this.initJoystick();
     }
 
     loadTex(path) {
@@ -133,21 +131,6 @@ export class Player {
         });
     }
 
-    initJoystick() {
-        const zone = document.getElementById('joystick-zone');
-        if (!zone) return;
-        this.joystick = nipplejs.create({
-            zone: zone,
-            mode: 'static',
-            position: { left: '80px', bottom: '80px' },
-            color: 'white'
-        });
-        this.joystick.on('move', (evt, data) => {
-            this.joystickInput.x = data.vector.x;
-            this.joystickInput.y = data.vector.y;
-        });
-        this.joystick.on('end', () => { this.joystickInput.x = 0; this.joystickInput.y = 0; });
-    }
 
     update(dt, worldProps = []) {
         let moveForward = 0;
@@ -157,9 +140,6 @@ export class Player {
         if (this.keys['KeyS'] || this.keys['ArrowDown']) moveForward = -1;
         if (this.keys['KeyA'] || this.keys['ArrowLeft']) moveSide = 1;
         if (this.keys['KeyD'] || this.keys['ArrowRight']) moveSide = -1;
-
-        if (Math.abs(this.joystickInput.y) > 0.1) moveForward = this.joystickInput.y;
-        if (Math.abs(this.joystickInput.x) > 0.1) moveSide = -this.joystickInput.x;
 
         // Apply WASD Movement relative to rotation
         if (moveForward !== 0 || moveSide !== 0) {
