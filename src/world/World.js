@@ -14,6 +14,7 @@ export class World {
         this.textureLoader = new THREE.TextureLoader();
         this.props = [];
         this.animals = [];
+        this.npcs = [];
         this.hidingSpots = []; // Positions for guli
         this.animalBubbles = new Map(); // Store DOM elements for bubbles
 
@@ -50,13 +51,25 @@ export class World {
             this.createHouse(pos.x, pos.z);
         });
 
-        // RANDOM HIDING SPOTS EVERYWHERE
-        for (let i = 0; i < 120; i++) {
-            const rx = (Math.random() - 0.5) * 120;
-            const rz = (Math.random() - 0.5) * 30;
-            this.hidingSpots.push(new THREE.Vector3(rx, 0.5, rz));
-        }
+        // NON-OVERLAPPING HIDING SPOTS
+        const minDistance = 3;
+        for (let i = 0; i < 250; i++) { // Increased pool for better distribution
+            let rx, rz, isTooClose;
+            let attempts = 0;
 
+            do {
+                rx = (Math.random() - 0.5) * 120;
+                rz = (Math.random() - 0.5) * 30;
+                isTooClose = this.hidingSpots.some(spot =>
+                    Math.sqrt(Math.pow(spot.x - rx, 2) + Math.pow(spot.z - rz, 2)) < minDistance
+                );
+                attempts++;
+            } while (isTooClose && attempts < 10);
+
+            if (!isTooClose) {
+                this.hidingSpots.push(new THREE.Vector3(rx, 0.5, rz));
+            }
+        }
         // Background Forest (Mario-style backdrop)
         for (let i = 0; i < 40; i++) {
             const tx = (Math.random() - 0.5) * 120;
@@ -73,8 +86,7 @@ export class World {
 
         // Bounty Board & Tok Aki: Moved away from center to clear the path
         this.createBountyBoard(-4, 0, -2);
-        this.createNPC(4, 0, -2);
-
+        this.createNPC(4, 0, -2, "Tok Aki", "Kampung Tok Aki");
         for (let i = 0; i < 20; i++) {
             const bx = (Math.random() - 0.5) * 80;
             const bz = (Math.random() - 0.5) * 10;
@@ -85,6 +97,19 @@ export class World {
 
         this.createDirtPaths();
         this.createWell(-5, -5);
+
+        // --- 10 STORY POINTS / LORE NPCs ---
+        this.createNPC(-6.5, 0, -5, "Sejarah Perigi");   // 1. Well
+        this.createNPC(-32, 0, 5, "Sejarah Tradisi");    // 2. Bushes
+        this.createNPC(5, 0, -15, "Seni Ukiran");         // 3. Near wood/house
+        this.createNPC(-15, 0, 10, "Ilmu Hisab");         // 4. Open area
+        this.createNPC(20, 0, 15, "Guli Kerang");         // 5. Rocks
+        this.createNPC(-25, 0, -20, "Lubang Induk");      // 6. Large forest area
+        this.createNPC(10, 0, 25, "Hubungan Kasih");      // 7. Garden area
+        this.createNPC(-35, 0, -10, "Varia Global");      // 8. Distant path
+        this.createNPC(30, 0, -5, "Taktik Apit");         // 9. Edge of village
+        // Tok Aki is point #10, created in main.js
+
         this.createLanterns();
 
         // --- NEW CONTENT: TRADITIONAL GAME SCENES ---
@@ -170,28 +195,68 @@ export class World {
         roof.castShadow = true;
         group.add(roof);
 
-        // Windows (High-Quality Restoration)
+        // Windows
         const windowGeo = new THREE.PlaneGeometry(1.2, 1.2);
-        const w1 = new THREE.Mesh(windowGeo, windowMat); w1.position.set(0, 2.8, 2.01); group.add(w1);
+        // Window 1 is now a DOOR
+        const doorGeo = new THREE.BoxGeometry(1.2, 2.0, 0.1);
+        const door = new THREE.Mesh(doorGeo, woodMat);
+        door.position.set(0, 2.5, 2.0); // Front door
+        group.add(door);
+
+        // Add a simple door frame/detail
+        const frame = new THREE.Mesh(new THREE.BoxGeometry(1.3, 2.1, 0.05), new THREE.MeshStandardMaterial({ color: 0x3E2723 }));
+        frame.position.set(0, 2.5, 1.98);
+        group.add(frame);
+
         const w2 = new THREE.Mesh(windowGeo, windowMat); w2.position.set(0, 2.8, -2.01); w2.rotation.y = Math.PI; group.add(w2);
         const w3 = new THREE.Mesh(windowGeo, windowMat); w3.position.set(2.01, 2.8, 0); w3.rotation.y = Math.PI / 2; group.add(w3);
         const w4 = new THREE.Mesh(windowGeo, windowMat); w4.position.set(-2.01, 2.8, 0); w4.rotation.y = -Math.PI / 2; group.add(w4);
 
+        // Stairs (Wooden planks) - LEGIT CONSTRUCTION
+        const stepWidth = 1.4;
+        const stepDepth = 0.4;
+        const stepHeight = 0.3;
+        const numSteps = 5;
+        const stairAngle = 38 * (Math.PI / 180); // Roughly 38 degrees
+
+        // Side Beams (Stringers)
+        const stringerGeo = new THREE.BoxGeometry(0.1, 0.2, 2.2);
+        const stringerMat = new THREE.MeshStandardMaterial({ color: 0x3E2723, roughness: 0.9 });
+
+        const leftStringer = new THREE.Mesh(stringerGeo, stringerMat);
+        leftStringer.position.set(-0.7, 0.9, 2.76);
+        leftStringer.rotation.x = stairAngle;
+        group.add(leftStringer);
+
+        const rightStringer = new THREE.Mesh(stringerGeo, stringerMat);
+        rightStringer.position.set(0.7, 0.9, 2.76);
+        rightStringer.rotation.x = stairAngle;
+        group.add(rightStringer);
+
+        // Steps
+        const stepGeo = new THREE.BoxGeometry(stepWidth, 0.1, stepDepth);
+        for (let i = 0; i < numSteps; i++) {
+            const step = new THREE.Mesh(stepGeo, woodMat);
+            // Distribute steps from ground to floor height (1.5m)
+            const stepY = (i + 1) * 0.3;
+            const stepZ = 3.65 - (i * 0.44);
+            step.position.set(0, stepY, stepZ);
+            group.add(step);
+        }
         group.position.set(x, 0, z);
         group.rotation.y = Math.random() * 0.5;
         this.scene.add(group);
         this.props.push(group);
     }
 
-    createNPC(x, y, z, name = "Tok Aki") {
+    createNPC(x, y, z, name) {
         const npc = new NPC(this.scene, this.textureLoader, {
             position: new THREE.Vector3(x, y, z),
-            facePath: name === "Tok Aki" ? '/assets/textures/player/tok_aki_face.png' : '/assets/textures/player/player_face.png',
-            shirtPath: '/assets/textures/player/player_shirt.png',
-            skinPath: '/assets/textures/player/player_skin.png',
-            pantsPath: '/assets/textures/player/player_pants.png'
+            name
         });
-        this.props.push(npc.mesh);
+        // Show quest marker for all story points
+        npc.showQuestMarker();
+        this.npcs.push(npc);
         return npc;
     }
 
@@ -594,6 +659,10 @@ export class World {
 
 
     update(dt, camera, player) {
+        // Update NPCs (for billboarding, etc)
+        this.npcs.forEach(npc => npc.update(camera));
+
+        const time = Date.now() * 0.001;
         this.animals.forEach(animal => {
             animal.timer -= dt;
             // Movement speeds
@@ -630,14 +699,35 @@ export class World {
                 animal.mesh.position.y = animal.baseHeight + Math.sin(Date.now() * 0.005) * 0.5;
             }
 
-            // TOOLTIP LOGIC
+            // TOOLTIP AND CATCH LOGIC
             const dist = player.mesh.position.distanceTo(animal.mesh.position);
+
+            // Animals flee from player when nearby
             if (dist < 5 && animal.type !== 'bird') {
+                const dir = animal.mesh.position.clone().sub(player.mesh.position).normalize();
+                const fleeSpeed = speed * 3;
+                animal.velocity.set(dir.x * fleeSpeed, 0, dir.z * fleeSpeed);
+                animal.mesh.rotation.y = Math.atan2(dir.x, dir.z);
+            }
+
+            // CATCH: Player touches the animal
+            if (dist < 1.5 && animal.type !== 'bird') {
+                // Remove animal from scene
+                this.scene.remove(animal.mesh);
+                this.hideAnimalBubble(animal);
+                // Dispatch catch event
+                window.dispatchEvent(new CustomEvent('animal-caught', { detail: { type: animal.type } }));
+                // Mark for removal
+                animal.caught = true;
+            } else if (dist < 5 && animal.type !== 'bird') {
                 this.showAnimalBubble(animal, camera);
             } else {
                 this.hideAnimalBubble(animal);
             }
         });
+
+        // Remove caught animals
+        this.animals = this.animals.filter(a => !a.caught);
     }
 
     showAnimalBubble(animal, camera) {

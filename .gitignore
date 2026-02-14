@@ -7,3 +7,4 @@ dist-ssr
 .agent
 .gemini
 tmp
+.env

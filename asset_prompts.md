@@ -1,6 +1,6 @@
 # 🎨 Congkak Quest Asset Generation Guide
 
-Use these prompts with **OpenArt (Recommended Model: Flux.1 Dev or SDXL)** for the best high-quality results. Save the images with the exact names provided below into your `public/assets/textures/` sub-folders.
+Use these prompts with **OpenArt (Recommended Models: Flux Kontext Dev, Flux.1 Dev, or SDXL)** for the best high-quality results. Save the images with the exact names provided below into your `public/assets/textures/` sub-folders.
 
 ### 📐 Recommended Resolutions:
 - **Seamless Textures (Wood, Grass, Planks):** 1024x1024 or 2048x2048 (Square)
@@ -28,6 +28,30 @@ Use these prompts with **OpenArt (Recommended Model: Flux.1 Dev or SDXL)** for t
 
 ### **File: `guli_white.png`**
 > **Prompt:** Close-up of a single translucent white glass marble, traditional Malaysian guli, internal swirls of pearlescent white and soft grey, shiny reflective surface, caustic light refractions, macro photography, white background.
+
+### **File: `guli_black.png`**
+> **Prompt:** Close-up of a single opaque obsidian black glass marble, Mythic Heritage Guli, internal swirls of deep violet and shimmering silver, shiny reflective surface, dramatic lighting, glossy finish, macro photography, white background.
+> **OpenArt Model:** Flux.1 Dev
+
+### **File: `guli_scam.png`**
+> **Prompt:** Close-up of a single vibrant neon purple glass marble, glowing internal swirls of hot pink and electric lime, extremely shiny and tempting, macro photography, white background.
+> **OpenArt Model:** Flux Kontext Dev
+
+### **File: `guli_scam_green.png`**
+> **Prompt:** Close-up of a single translucent emerald green glass marble, glowing internal swirls of lime and jade green, extremely shiny and tempting like a nature gem, macro photography, white background.
+> **OpenArt Model:** Flux Kontext Dev
+
+### **File: `guli_scam_orange.png`**
+> **Prompt:** Close-up of a single translucent bright orange glass marble, glowing internal swirls of amber and molten gold, extremely shiny and tempting like a rare treasure, macro photography, white background.
+> **OpenArt Model:** Flux Kontext Dev
+
+### **File: `guli_scam_brown.png`**
+> **Prompt:** Close-up of a single translucent dark brown glass marble, glowing internal swirls of bronze and ancient copper, extremely shiny and tempting like an antique artifact, macro photography, white background.
+> **OpenArt Model:** Flux Kontext Dev
+
+### **File: `guli_scam_pink.png`**
+> **Prompt:** Close-up of a single translucent hot pink glass marble, glowing internal swirls of rose and magenta, extremely shiny and tempting like a love charm, macro photography, white background.
+> **OpenArt Model:** Flux Kontext Dev
 
 ---
 

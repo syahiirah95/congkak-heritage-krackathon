@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
     "cannon-es": "^0.20.0",
     "lucide-static": "^0.564.0",
     "nipplejs": "^0.10.2",

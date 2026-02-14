@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Congkak Quest - Heritage Reimagined</title>
+    <link rel="icon" type="image/png" href="/assets/textures/congkak/guli_yellow.png">
     <link rel="stylesheet" href="./style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +18,10 @@
     <div id="game-container">
         <canvas id="bg"></canvas>
         <div id="crosshair"></div>
-        <div id="mouse-hint">Hold Left-Click to rotate | Scroll to zoom</div>
+        <div id="help-hint-container">
+            <div id="mouse-hint" class="hidden">Hold Left-Click to rotate | Scroll to zoom</div>
+            <button id="help-btn" class="help-btn">?</button>
+        </div>
         <div id="recharge-flash" class="recharge-flash"></div>
         <div id="energy-popup" class="energy-recharge-popup">ENERGY RECHARGE! ⚡</div>
 
@@ -25,42 +29,100 @@
         <div id="ui-layer">
 
             <!-- ======== TOP STATUS BAR ======== -->
-            <div id="top-bar" class="hidden">
+            <div id="top-bar">
                 <div class="top-bar-left">
                     <div class="profile-pill">
-                        <img src="/assets/textures/player/player_face.png" alt="Avatar" class="avatar-icon">
-                        <span class="player-name">Player</span>
+                        <img id="avatar-icon" src="/assets/textures/player/player_face.png" alt="Avatar"
+                            class="avatar-icon">
+                        <span id="player-name" class="player-name">Pemain</span>
                     </div>
+                    <button id="google-login-btn"
+                        style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 18px;border-radius:30px;border:2px solid var(--primary);background:white;color:#333;font-family:inherit;font-size:0.75rem;font-weight:900;letter-spacing:1px;box-shadow:0 0 15px rgba(255,184,0,0.3);white-space:nowrap;height:38px;width:130px;align-self:center;margin-left:5px">🔑
+                        LOG IN</button>
+                    <button id="logout-btn" class="hidden"
+                        style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 18px;border-radius:30px;border:2px solid #ff4d4f;background:rgba(20, 10, 5, 0.6);color:#fff;font-family:inherit;font-size:0.75rem;font-weight:900;letter-spacing:1px;box-shadow:0 0 15px rgba(255,77,79,0.2);backdrop-filter:blur(5px);white-space:nowrap;height:38px;width:130px;align-self:center;margin-left:5px">LOG
+                        OUT</button>
                 </div>
+
+                <div class="top-bar-center">
+                    <nav class="top-nav">
+                        <button class="top-nav-btn" id="nav-play">
+                            <span class="top-nav-icon">🎲</span>
+                            <span class="top-nav-label">PLAY</span>
+                        </button>
+                        <button class="top-nav-btn" id="nav-map">
+                            <span class="top-nav-icon">🗺️</span>
+                            <span class="top-nav-label">MAP</span>
+                        </button>
+                        <button class="top-nav-btn" id="nav-inventory">
+                            <span class="top-nav-icon">🎒</span>
+                            <span class="top-nav-label">BAG</span>
+                            <span class="notif-dot"></span>
+                        </button>
+                        <button class="top-nav-btn" id="nav-missions">
+                            <span class="top-nav-icon">📜</span>
+                            <span class="top-nav-label">QUEST</span>
+                            <span class="notif-dot active"></span>
+                        </button>
+                        <button class="top-nav-btn" id="nav-settings">
+                            <span class="top-nav-icon">🏆</span>
+                            <span class="top-nav-label">RANK</span>
+                        </button>
+                    </nav>
+                </div>
+
                 <div class="top-bar-right">
+                    <div class="resource-pill xp-pill">
+                        <span class="res-icon">🌟</span>
+                        <span id="xp-val" class="res-val">0 XP</span>
+                    </div>
                     <div class="resource-pill energy-pill">
                         <span class="res-icon">⚡</span>
-                        <span id="energy-val" class="res-val">20</span>
+                        <span id="energy-val" class="res-val">100</span>
                     </div>
                     <div class="resource-pill coin-pill">
                         <span class="res-icon">🪙</span>
-                        <span id="coin-val" class="res-val">150</span>
+                        <span id="coin-val" class="res-val">0</span>
                     </div>
                     <div class="resource-pill guli-pill">
                         <span class="res-icon">🔮</span>
-                        <span id="guli-val" class="res-val">0 / 10</span>
+                        <span id="guli-val" class="res-val">0 guli</span>
                     </div>
+                    <span id="level-val" style="display:none">1</span>
                 </div>
             </div>
 
             <!-- ======== HUD (Explore & Congkak) ======== -->
             <div id="hud" class="hidden">
-
-                <!-- Explore HUD -->
-                <div id="explore-hud">
-                    <div class="level-badge">
-                        <span class="level-label">LEVEL</span>
-                        <span id="level-val" class="level-num">1</span>
+                <!-- World Map HUD Panel -->
+                <div id="world-map" class="bounty-panel">
+                    <div class="bounty-header">
+                        <span class="bounty-icon">🗺️</span>
+                        <h4 class="bounty-title">VILLAGE MAP</h4>
+                    </div>
+                    <div class="level-path-mini">
+                        <div class="level-node-mini active" data-level="0">
+                            <div class="node-circle-mini">1</div>
+                            <img src="/assets/textures/player/tok_aki_face.png" class="map-face-mini">
+                            <span class="node-label-mini">Tok Aki</span>
+                        </div>
+                        <div class="path-line-mini"></div>
+                        <div class="level-node-mini locked" data-level="1">
+                            <div class="node-circle-mini">2</div>
+                            <img src="/assets/textures/player/player_face.png" class="map-face-mini">
+                            <span class="node-label-mini">Nek Senah</span>
+                        </div>
+                        <div class="path-line-mini"></div>
+                        <div class="level-node-mini locked" data-level="2">
+                            <div class="node-circle-mini">3</div>
+                            <img src="/assets/textures/player/player_face.png" class="map-face-mini">
+                            <span class="node-label-mini">Pak Abu</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Bounty Board / Quest Panel -->
-                <div id="bounty-hud" class="bounty-panel hidden">
+                <div id="bounty-hud" class="bounty-panel">
                     <div class="bounty-header">
                         <span class="bounty-icon">📜</span>
                         <h4 class="bounty-title">MISSIONS</h4>
@@ -71,7 +133,7 @@
                             <div class="quest-row">
                                 <div class="quest-info">
                                     <span class="quest-icon">🔮</span>
-                                    <span>Collect 10 Gulis</span>
+                                    <span>Collect 49 Gulis</span>
                                 </div>
                                 <span id="guli-ready-indicator" class="ready-notif hidden">READY!</span>
                             </div>
@@ -84,55 +146,141 @@
                     </ul>
                 </div>
 
-                <!-- Congkak HUD -->
-                <div id="congkak-hud" class="hidden">
-                    <div class="congkak-status-bar">
-                        <div class="congkak-stat">
-                            <span class="label">STATUS</span>
-                            <span id="game-status" class="value">YOUR TURN</span>
-                        </div>
-                        <div class="congkak-scores">
-                            <div class="score-chip you">
-                                <span class="score-label">YOU</span>
-                                <span id="p1-score" class="score-num">0</span>
-                            </div>
-                            <span class="vs-text">VS</span>
-                            <div class="score-chip ai">
-                                <span class="score-label">TOK AKI</span>
-                                <span id="ai-score" class="score-num">0</span>
-                            </div>
-                        </div>
+                <!-- Guli Bag / Vault HUD -->
+                <div id="guli-vault-mini" class="bounty-panel">
+                    <div class="bounty-header">
+                        <span class="bounty-icon">🔮</span>
+                        <h4 class="bounty-title">GULI BAG</h4>
                     </div>
-                    <div class="congkak-rules">
-                        Select a hole on your side (bottom row) to start.
+                    <div class="vault-grid-mini">
+                        <div class="vault-item-mini black-glow">
+                            <img src="/assets/textures/congkak/guli_black.png">
+                            <span id="vault-black-mini" class="vault-count">0</span>
+                        </div>
+                        <div class="vault-item-mini blue-glow">
+                            <img src="/assets/textures/congkak/guli_blue.png">
+                            <span id="vault-blue-mini" class="vault-count">0</span>
+                        </div>
+                        <div class="vault-item-mini yellow-glow">
+                            <img src="/assets/textures/congkak/guli_yellow.png">
+                            <span id="vault-yellow-mini" class="vault-count">0</span>
+                        </div>
+                        <div class="vault-item-mini red-glow">
+                            <img src="/assets/textures/congkak/guli_red.png">
+                            <span id="vault-red-mini" class="vault-count">0</span>
+                        </div>
+                        <div class="vault-item-mini white-glow">
+                            <img src="/assets/textures/congkak/guli_white.png">
+                            <span id="vault-white-mini" class="vault-count">0</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- ======== NAV BUTTONS (Bottom) ======== -->
-            <div id="bottom-nav" class="hidden">
-                <button class="nav-btn btn-play" id="nav-play">
-                    <span class="nav-icon">🎲</span>
-                    <span class="nav-label">Play</span>
-                </button>
-                <button class="nav-btn" id="nav-map">
-                    <span class="nav-icon">🗺️</span>
-                    <span class="nav-label">Map</span>
-                </button>
-                <button class="nav-btn" id="nav-inventory">
-                    <span class="nav-icon">🎒</span>
-                    <span class="nav-label">Inventory</span>
-                    <span class="notif-dot"></span>
-                </button>
-                <button class="nav-btn" id="nav-missions">
-                    <span class="nav-icon">📋</span>
-                    <span class="nav-label">Missions</span>
-                    <span class="notif-dot active"></span>
-                </button>
-                <button class="nav-btn" id="nav-settings">
-                    <span class="nav-icon">⚙️</span>
-                    <span class="nav-label">Settings</span>
-                </button>
+                <!-- Leaderboard HUD Panel -->
+                <div id="leaderboard-panel" class="bounty-panel">
+                    <div class="bounty-header">
+                        <span class="bounty-icon">🏆</span>
+                        <h4 class="bounty-title">LEADERBOARD</h4>
+                    </div>
+                    <table style="width:100%;border-collapse:collapse;text-align:left;font-size:0.75rem">
+                        <thead>
+                            <tr style="border-bottom:2px solid var(--primary);color:var(--primary)">
+                                <th style="padding:6px 4px">#</th>
+                                <th style="padding:6px 4px">PEMAIN</th>
+                                <th style="padding:6px 4px">SKOR</th>
+                                <th style="padding:6px 4px">W/L</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body">
+                            <tr>
+                                <td colspan="4" style="padding:12px;text-align:center;opacity:0.5">Tiada data lagi</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Congkak HUD -->
+
+            </div> <!-- End HUD -->
+
+            <!-- ======== 2D CONGKAK OVERLAY (Modal) ======== -->
+            <div id="congkak-2d-overlay" class="overlay hidden">
+                <div class="menu-content congkak-paper-modal">
+                    <button id="exit-congkak-btn" class="map-close-btn">✘</button>
+                    <h2 class="heritage-heading">Congkak Challenge</h2>
+
+                    <div class="congkak-interaction-area">
+                        <div class="board-2d-container">
+                            <!-- AI Row (Top) -->
+                            <div class="board-row ai-row">
+                                <div id="hole-13-2d" class="hole-2d"><span class="hole-seeds">0</span></div>
+                                <div id="hole-12-2d" class="hole-2d"><span class="hole-seeds">0</span></div>
+                                <div id="hole-11-2d" class="hole-2d"><span class="hole-seeds">0</span></div>
+                                <div id="hole-10-2d" class="hole-2d"><span class="hole-seeds">0</span></div>
+                                <div id="hole-9-2d" class="hole-2d"><span class="hole-seeds">0</span></div>
+                                <div id="hole-8-2d" class="hole-2d"><span class="hole-seeds">0</span></div>
+                                <div id="hole-7-2d" class="hole-2d"><span class="hole-seeds">0</span></div>
+                            </div>
+
+                            <!-- Player Row (Bottom) -->
+                            <div class="board-row player-row">
+                                <div id="hole-0-2d" class="hole-2d player-hole"><span class="hole-seeds">0</span></div>
+                                <div id="hole-1-2d" class="hole-2d player-hole"><span class="hole-seeds">0</span></div>
+                                <div id="hole-2-2d" class="hole-2d player-hole"><span class="hole-seeds">0</span></div>
+                                <div id="hole-3-2d" class="hole-2d player-hole"><span class="hole-seeds">0</span></div>
+                                <div id="hole-4-2d" class="hole-2d player-hole"><span class="hole-seeds">0</span></div>
+                                <div id="hole-5-2d" class="hole-2d player-hole"><span class="hole-seeds">0</span></div>
+                                <div id="hole-6-2d" class="hole-2d player-hole"><span class="hole-seeds">0</span></div>
+                            </div>
+
+                            <!-- Stores -->
+                            <div id="hole-15-2d" class="store-2d store-left"><span class="store-seeds">0</span></div>
+                            <div id="hole-14-2d" class="store-2d store-right"><span class="store-seeds">0</span></div>
+
+                            <div class="board-label">MALAY HERITAGE CONGKAK</div>
+                        </div>
+                    </div>
+
+
+                    <!-- HUD integrated into modal -->
+                    <div id="congkak-hud-internal" class="congkak-hud-modal">
+                        <div class="congkak-scores">
+                            <div class="score-wrapper you">
+                                <div class="avatar-box">
+                                    <img id="player-avatar" src="/assets/textures/player/player_face.png"
+                                        class="congkak-avatar" alt="You">
+                                    <div id="p1-turn-indicator" class="turn-status-label active">YOUR TURN</div>
+                                </div>
+                                <div class="score-chip">
+                                    <span class="score-label">YOU</span>
+                                    <span id="p1-score" class="score-num">0</span>
+                                </div>
+                            </div>
+                            <div class="congkak-center-stat">
+                                <span class="vs-text">VS</span>
+                                <div id="game-status" class="status-pill">YOUR TURN</div>
+                            </div>
+                            <div class="score-wrapper ai">
+                                <div class="score-chip">
+                                    <span class="score-label">TOK AKI</span>
+                                    <span id="ai-score" class="score-num">0</span>
+                                </div>
+                                <div class="avatar-box">
+                                    <img id="ai-avatar" src="/assets/textures/player/tok_aki_face.png"
+                                        class="congkak-avatar" alt="Tok Aki">
+                                    <div id="ai-turn-indicator" class="turn-status-label">TOK AKI'S TURN</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Inspector -->
+                    <div id="hole-inspector" class="hole-inspector-bottom">
+                        <div id="inspector-content" class="inspector-content-row">
+                            <span class="inspector-hint">HOVER OVER A HOLE TO VIEW GULI DETAILS</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- ======== MAIN MENU / TITLE SCREEN ======== -->
@@ -161,38 +309,7 @@
                 </div>
             </div>
 
-            <!-- ======== WORLD MAP / LEVEL SELECT ======== -->
-            <div id="world-map" class="overlay hidden">
-                <div class="map-container">
-                    <h2 class="map-title">🗺️ Village Map</h2>
-                    <div class="level-path">
-                        <div class="path-line"></div>
-                        <div class="level-node active" data-level="0">
-                            <div class="node-circle">1</div>
-                            <div class="node-stars">
-                                <span class="star filled">★</span><span class="star">★</span><span class="star">★</span>
-                            </div>
-                            <span class="node-label">Congkak Island</span>
-                        </div>
-                        <div class="level-node locked" data-level="1">
-                            <div class="node-circle">2</div>
-                            <div class="node-stars">
-                                <span class="star">★</span><span class="star">★</span><span class="star">★</span>
-                            </div>
-                            <span class="node-label">Secret Forest</span>
-                        </div>
-                        <div class="level-node locked" data-level="2">
-                            <div class="node-circle">3</div>
-                            <div class="node-stars">
-                                <span class="star">★</span><span class="star">★</span><span class="star">★</span>
-                            </div>
-                            <span class="node-label">Marble Palace</span>
-                        </div>
-                    </div>
-                    <button id="map-play-btn" class="primary-btn map-play-btn">PLAY LEVEL 1</button>
-                    <button id="map-close-btn" class="map-close-btn">✕ Close</button>
-                </div>
-            </div>
+
 
             <!-- ======== MINIGAME SELECTION ======== -->
             <div id="game-selector" class="overlay hidden">
@@ -230,7 +347,33 @@
                         <span>GOAL: <b id="match3-target">0 / 50</b></span>
                         <button id="match3-exit" class="small-btn">EXIT</button>
                     </div>
-                    <div id="match3-grid" class="match3-grid"></div>
+                </div>
+            </div> <!-- end match3-game -->
+
+            <!-- ======== DIFFICULTY SELECTOR ======== -->
+            <div id="difficulty-selector" class="overlay hidden">
+                <div class="menu-content difficulty-content">
+                    <button id="close-diff-btn" class="map-close-btn">✘</button>
+                    <h2 class="heritage-heading small">CHOOSE CHALLENGE</h2>
+                    <p class="difficulty-hint">How tough is Tok Aki today?</p>
+                    <div class="difficulty-options">
+                        <div class="difficulty-card easy" data-level="easy">
+                            <div class="diff-icon">👴</div>
+                            <h3>Easy</h3>
+                            <p class="reward-hint">Win: +50 🪙</p>
+                        </div>
+                        <div class="difficulty-card normal" data-level="normal">
+                            <div class="diff-icon">👵</div>
+                            <h3>Normal</h3>
+                            <p class="reward-hint">Win: +100 🪙</p>
+                        </div>
+                        <div class="difficulty-card hard" data-level="hard">
+                            <div class="diff-icon">🔥</div>
+                            <h3>Hard</h3>
+                            <p class="reward-hint">Win: +150 🪙</p>
+                        </div>
+                    </div>
+                    <p class="penalty-hint">Penalty for losing: -10 🪙</p>
                 </div>
             </div>
 
@@ -248,51 +391,37 @@
                 </div>
             </div>
 
-            <!-- Mobile Controls -->
-        </div>
-    </div>
-
-    <!-- ======== STORY / DIALOGUE OVERLAY ======== -->
-    <div id="story-overlay" class="overlay hidden">
-        <div class="story-container">
-            <div class="portrait-container">
-                <img id="story-portrait" src="/assets/textures/player/player_face.png" alt="Portrait">
-            </div>
-            <div id="story-content" class="story-box ui-interactable">
-                <div class="story-controls">
-                    <button id="story-skip">SKIP</button>
-                    <button id="story-next">NEXT ➔</button>
+            <!-- ======== STORY / DIALOGUE OVERLAY ======== -->
+            <div id="story-overlay" class="overlay hidden">
+                <div class="story-container">
+                    <div class="portrait-container">
+                        <img id="story-portrait" src="/assets/textures/player/player_face.png" alt="Portrait">
+                    </div>
+                    <div id="story-content" class="story-box ui-interactable">
+                        <div class="story-controls">
+                            <button id="story-skip">SKIP</button>
+                            <button id="story-next">NEXT ➔</button>
+                        </div>
+                        <h4 id="story-name" class="story-name">Tok Aki</h4>
+                        <p id="story-text"></p>
+                    </div>
                 </div>
-                <h4 id="story-name" class="story-name">Tok Aki</h4>
-                <p id="story-text"></p>
             </div>
-        </div>
-    </div>
 
-    <!-- ======== GULI VAULT / INVENTORY HUD ======== -->
-    <div id="guli-vault" class="vault-container hidden">
-        <h3 class="vault-title">🔮 Guli Collection</h3>
-        <div class="vault-grid">
-            <div class="vault-item blue-glow">
-                <img src="/assets/textures/congkak/guli_blue.png" alt="Blue Guli">
-                <span id="vault-blue" class="vault-count">0</span>
+            <!-- ======== SCAM OVERLAY ======== -->
+            <div id="scam-overlay" class="overlay hidden">
+                <div class="scam-box">
+                    <div class="scam-animal">🐒</div>
+                    <div class="scam-msg">BOO KENA SCAM!</div>
+                    <p>Ini bukan guli sebenar...</p>
+                    <button id="scam-close" class="primary-btn">Aduhai...</button>
+                </div>
             </div>
-            <div class="vault-item yellow-glow">
-                <img src="/assets/textures/congkak/guli_yellow.png" alt="Yellow Guli">
-                <span id="vault-yellow" class="vault-count">0</span>
-            </div>
-            <div class="vault-item red-glow">
-                <img src="/assets/textures/congkak/guli_red.png" alt="Red Guli">
-                <span id="vault-red" class="vault-count">0</span>
-            </div>
-            <div class="vault-item white-glow">
-                <img src="/assets/textures/congkak/guli_white.png" alt="White Guli">
-                <span id="vault-white" class="vault-count">0</span>
-            </div>
-        </div>
-    </div>
 
-    <script type="module" src="/main.js"></script>
+        </div> <!-- end ui-layer -->
+
+
+        <script type="module" src="/main.js"></script>
 </body>
 
 </html>

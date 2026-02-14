@@ -77,13 +77,16 @@ export class CongkakBoard {
         // Small Holes (Kampung) — carved deeper
         for (let i = 0; i < 7; i++) {
             const xPos = -3.6 + (i * 1.2);
-            this.holeMeshes[i] = this.createHole(xPos, 0.15, 0.7, i, holeMat);           // Player 1 row (front)
-            this.holeMeshes[7 + i] = this.createHole(-3.6 + ((6 - i) * 1.2), 0.15, -0.7, 7 + i, holeMat); // Player 2 row (back)
+            // Create unique material for each hole so they can highlight individually
+            const p1Mat = holeMat.clone();
+            const p2Mat = holeMat.clone();
+            this.holeMeshes[i] = this.createHole(xPos, 0.15, 0.7, i, p1Mat);           // Player 1 row (front)
+            this.holeMeshes[7 + i] = this.createHole(-3.6 + ((6 - i) * 1.2), 0.15, -0.7, 7 + i, p2Mat); // Player 2 row (back)
         }
 
-        // Storehouses (Induk) — larger
-        this.holeMeshes[14] = this.createStorehouse(5.2, 14, holeMat);  // P1 right
-        this.holeMeshes[15] = this.createStorehouse(-5.2, 15, holeMat); // P2 left
+        // Storehouses (Induk) — larger with unique materials
+        this.holeMeshes[14] = this.createStorehouse(5.2, 14, holeMat.clone());  // P1 right
+        this.holeMeshes[15] = this.createStorehouse(-5.2, 15, holeMat.clone()); // P2 left
     }
 
     createHole(x, y, z, id, mat) {
@@ -185,8 +188,9 @@ export class CongkakBoard {
                 // Map type to material index
                 let matIdx = 3; // default white/normal
                 if (type === 'blue') matIdx = 0;
-                else if (type === 'gold') matIdx = 1;
+                else if (type === 'yellow') matIdx = 1;
                 else if (type === 'red') matIdx = 2;
+                else if (type === 'black') matIdx = 1; // High value black using gold texture for visibility for now
 
                 const seed = new THREE.Mesh(this.seedGeo, this.seedMats[matIdx]);
                 seed.position.set(sx, sy, sz);
@@ -205,14 +209,15 @@ export class CongkakBoard {
         });
     }
 
-    highlightHole(holeIdx) {
+    highlightHole(holeIdx, color = 0xffd700) {
         // Reset previous highlight
         if (this.highlightedHole !== null && this.holeMeshes[this.highlightedHole]) {
             this.holeMeshes[this.highlightedHole].material.emissive.setHex(0x000000);
         }
 
         if (holeIdx !== null && this.holeMeshes[holeIdx]) {
-            this.holeMeshes[holeIdx].material.emissive.setHex(0x443300);
+            this.holeMeshes[holeIdx].material.emissive.setHex(color);
+            this.holeMeshes[holeIdx].material.emissiveIntensity = 2.0;
             this.highlightedHole = holeIdx;
         } else {
             this.highlightedHole = null;

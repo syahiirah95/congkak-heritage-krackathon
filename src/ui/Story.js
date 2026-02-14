@@ -8,7 +8,7 @@ export class Story {
         this.nextBtn = document.getElementById('story-next');
         this.skipBtn = document.getElementById('story-skip');
 
-        this.slides = [
+        this.defaultSlides = [
             {
                 name: "Tok Aki",
                 portrait: "/assets/textures/player/tok_aki_face.png",
@@ -25,23 +25,27 @@ export class Story {
                 text: "But alas! My precious guli collection has been scattered by the winds... hidden behind houses and tucked away in bushes.",
             },
             {
-                name: "You",
+                name: "Pemain",
                 portrait: "/assets/textures/player/player_face.png",
                 text: "Don't worry, Tok Aki! I'll find them all and return them to you.",
             },
             {
                 name: "Tok Aki",
                 portrait: "/assets/textures/player/tok_aki_face.png",
-                text: "I hope so. Once you collect 10 guli, meet me at the Main Congkak Board. We shall see if you have what it takes to be a master!",
+                text: "I hope so. Once you collect 49 guli, meet me at the Main Congkak Board. We shall see if you have what it takes to be a master!",
             }
         ];
 
+        this.slides = this.defaultSlides;
+        this.energyReward = 50;
         this.currentSlide = 0;
         this.nextBtn.onclick = () => this.next();
         if (this.skipBtn) this.skipBtn.onclick = () => this.finish();
     }
 
-    start() {
+    start(customSlides = null, energyReward = 50) {
+        this.slides = customSlides || this.defaultSlides;
+        this.energyReward = energyReward;
         this.overlay.classList.remove('hidden');
         this.currentSlide = 0;
         this.showSlide();
@@ -78,6 +82,36 @@ export class Story {
 
     finish() {
         this.overlay.classList.add('hidden');
+
+        // Custom Energy reward for completing the story
+        window.dispatchEvent(new CustomEvent('story-complete', { detail: { energyReward: this.energyReward } }));
+
+        // Show reward popup
+        const reward = document.createElement('div');
+        reward.innerHTML = `⚡ +${this.energyReward} TENAGA`;
+        reward.style.cssText = `
+            position: fixed;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 15, 5, 0.9);
+            backdrop-filter: blur(10px);
+            color: #FFD54F;
+            padding: 14px 32px;
+            border-radius: 14px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            border: 2px solid rgba(255, 184, 0, 0.6);
+            box-shadow: 0 0 30px rgba(255, 184, 0, 0.3);
+            pointer-events: none;
+            z-index: 9999;
+            animation: collectPopAnim 1.5s ease-out forwards;
+        `;
+        document.body.appendChild(reward);
+        setTimeout(() => reward.remove(), 1600);
+
         if (this.onComplete) this.onComplete();
     }
 }
