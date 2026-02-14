@@ -148,6 +148,7 @@ export class Player {
             moveDir.normalize();
 
             // Movement without collision (ghost mode)
+            const nextPos = this.mesh.position.clone().addScaledVector(moveDir, this.speed);
             this.mesh.position.copy(nextPos);
 
             const time = Date.now() * 0.01;
