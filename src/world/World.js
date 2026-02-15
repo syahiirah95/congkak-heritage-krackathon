@@ -141,7 +141,7 @@ export class World {
         skyTex.mapping = THREE.EquirectangularReflectionMapping;
         this.scene.background = skyTex;
         this.scene.environment = skyTex;
-        this.scene.fog = new THREE.FogExp2(0xd4a373, 0.012);
+        this.scene.fog = new THREE.FogExp2(0xd4a373, 0.0025);
     }
 
     createGround() {
@@ -249,10 +249,11 @@ export class World {
         this.props.push(group);
     }
 
-    createNPC(x, y, z, name) {
+    createNPC(x, y, z, name, bannerText) {
         const npc = new NPC(this.scene, this.textureLoader, {
             position: new THREE.Vector3(x, y, z),
-            name
+            name,
+            bannerText
         });
         // Show quest marker for all story points
         npc.showQuestMarker();

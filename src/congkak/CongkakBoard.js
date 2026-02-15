@@ -226,9 +226,9 @@ export class CongkakBoard {
 
     show() {
         this.scene.add(this.group);
+        // Position the 3D board but don't hijack the camera
+        // The camera should stay on the player/last world view for background immersion
         this.group.position.set(0, 5, 0);
-        this.camera.position.set(0, 12, 5);
-        this.camera.lookAt(0, 5, 0);
     }
 
     hide() {

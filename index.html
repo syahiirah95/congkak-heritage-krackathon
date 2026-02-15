@@ -12,11 +12,13 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Nunito:wght@600;700;800;900&display=swap"
         rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
     <div id="game-container">
         <canvas id="bg"></canvas>
+        <div id="joystick-zone" class="hidden"></div>
         <div id="crosshair"></div>
         <div id="help-hint-container">
             <div id="mouse-hint" class="hidden">Hold Left-Click to rotate | Scroll to zoom</div>
@@ -34,39 +36,50 @@
                     <div class="profile-pill">
                         <img id="avatar-icon" src="/assets/textures/player/player_face.png" alt="Avatar"
                             class="avatar-icon">
-                        <span id="player-name" class="player-name">Pemain</span>
+                        <span id="player-name" class="player-name">Player</span>
                     </div>
+                    <button id="hud-toggle-btn" class="hud-toggle-btn"><i data-lucide="eye"></i></button>
                     <button id="google-login-btn"
-                        style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 18px;border-radius:30px;border:2px solid var(--primary);background:white;color:#333;font-family:inherit;font-size:0.75rem;font-weight:900;letter-spacing:1px;box-shadow:0 0 15px rgba(255,184,0,0.3);white-space:nowrap;height:38px;width:130px;align-self:center;margin-left:5px">🔑
-                        LOG IN</button>
+                        style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 18px;border-radius:30px;border:2px solid var(--primary);background:white;color:#333;font-family:inherit;font-size:0.75rem;font-weight:900;letter-spacing:1px;box-shadow:0 0 15px rgba(255,184,0,0.3);white-space:nowrap;height:38px;width:130px;align-self:center;margin-left:5px">
+                        <i data-lucide="key" style="width:16px;height:16px"></i>
+                        <span>LOG IN</span></button>
                     <button id="logout-btn" class="hidden"
-                        style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 18px;border-radius:30px;border:2px solid #ff4d4f;background:rgba(20, 10, 5, 0.6);color:#fff;font-family:inherit;font-size:0.75rem;font-weight:900;letter-spacing:1px;box-shadow:0 0 15px rgba(255,77,79,0.2);backdrop-filter:blur(5px);white-space:nowrap;height:38px;width:130px;align-self:center;margin-left:5px">LOG
-                        OUT</button>
+                        style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 18px;border-radius:30px;border:2px solid #ff4d4f;background:rgba(20, 10, 5, 0.6);color:#fff;font-family:inherit;font-size:0.75rem;font-weight:900;letter-spacing:1px;box-shadow:0 0 15px rgba(255,77,79,0.2);backdrop-filter:blur(5px);white-space:nowrap;height:38px;width:130px;align-self:center;margin-left:5px">
+                        <i data-lucide="log-out" style="width:16px;height:16px"></i>
+                        <span class="logout-text">LOG OUT</span></button>
                 </div>
 
                 <div class="top-bar-center">
                     <nav class="top-nav">
-                        <button class="top-nav-btn" id="nav-play">
+                        <button class="top-nav-btn nav-link-play" id="nav-play">
                             <span class="top-nav-icon">🎲</span>
                             <span class="top-nav-label">PLAY</span>
                         </button>
-                        <button class="top-nav-btn" id="nav-map">
+                        <button class="top-nav-btn nav-link-map" id="nav-map">
                             <span class="top-nav-icon">🗺️</span>
                             <span class="top-nav-label">MAP</span>
                         </button>
-                        <button class="top-nav-btn" id="nav-inventory">
+                        <button class="top-nav-btn nav-link-inventory" id="nav-inventory">
                             <span class="top-nav-icon">🎒</span>
                             <span class="top-nav-label">BAG</span>
                             <span class="notif-dot"></span>
                         </button>
-                        <button class="top-nav-btn" id="nav-missions">
+                        <button class="top-nav-btn nav-link-missions" id="nav-missions">
                             <span class="top-nav-icon">📜</span>
                             <span class="top-nav-label">QUEST</span>
                             <span class="notif-dot active"></span>
                         </button>
-                        <button class="top-nav-btn" id="nav-settings">
+                        <button class="top-nav-btn nav-link-rank" id="nav-rank">
                             <span class="top-nav-icon">🏆</span>
                             <span class="top-nav-label">RANK</span>
+                        </button>
+                        <button class="top-nav-btn nav-link-history" id="nav-history">
+                            <span class="top-nav-icon">📜</span>
+                            <span class="top-nav-label">HISTORY</span>
+                        </button>
+                        <button class="top-nav-btn nav-link-joystick" id="nav-joystick">
+                            <span class="top-nav-icon">🕹️</span>
+                            <span class="top-nav-label">CONTROL</span>
                         </button>
                     </nav>
                 </div>
@@ -182,21 +195,54 @@
                         <span class="bounty-icon">🏆</span>
                         <h4 class="bounty-title">LEADERBOARD</h4>
                     </div>
-                    <table style="width:100%;border-collapse:collapse;text-align:left;font-size:0.75rem">
-                        <thead>
-                            <tr style="border-bottom:2px solid var(--primary);color:var(--primary)">
-                                <th style="padding:6px 4px">#</th>
-                                <th style="padding:6px 4px">PEMAIN</th>
-                                <th style="padding:6px 4px">SKOR</th>
-                                <th style="padding:6px 4px">W/L</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leaderboard-body">
-                            <tr>
-                                <td colspan="4" style="padding:12px;text-align:center;opacity:0.5">Tiada data lagi</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="leaderboard-scroll-container"
+                        style="width:100%; overflow-x:auto;-webkit-overflow-scrolling:touch;">
+                        <table
+                            style="width:100%;min-width:320px;border-collapse:collapse;text-align:left;font-size:0.75rem; white-space: nowrap;">
+                            <thead>
+                                <tr style="border-bottom:2px solid var(--primary);color:var(--primary)">
+                                    <th style="padding:6px 4px">#</th>
+                                    <th style="padding:6px 4px">PEMAIN</th>
+                                    <th style="padding:6px 4px">XP</th>
+                                    <th style="padding:6px 4px">SKOR</th>
+                                    <th style="padding:6px 4px">W/L</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body">
+                                <tr>
+                                    <td colspan="5" style="padding:12px;text-align:center;opacity:0.5">Tiada data lagi
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- History HUD Panel -->
+                <div id="history-panel" class="bounty-panel hidden">
+                    <div class="bounty-header">
+                        <span class="bounty-icon">📜</span>
+                        <h4 class="bounty-title">MATCH HISTORY</h4>
+                    </div>
+                    <div class="leaderboard-scroll-container" style="width:100%; overflow-x:auto;">
+                        <table
+                            style="width:100%; border-collapse:collapse; text-align:left; font-size:0.7rem; white-space: nowrap;">
+                            <thead>
+                                <tr style="border-bottom:1px solid var(--primary); color:var(--primary)">
+                                    <th style="padding:4px">DATE</th>
+                                    <th style="padding:4px">RESULT</th>
+                                    <th style="padding:4px">SCORE</th>
+                                    <th style="padding:4px">REWARD</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-body">
+                                <tr>
+                                    <td colspan="4" style="padding:12px; text-align:center; opacity:0.5">Tiada rekod
+                                        lagi</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- Congkak HUD -->
@@ -285,24 +331,27 @@
 
             <!-- ======== MAIN MENU / TITLE SCREEN ======== -->
             <div id="main-menu" class="overlay">
-                <div class="menu-content">
+                <div class="menu-content main-menu-scroll">
                     <h1 class="glitch-text">CONGKAK QUEST</h1>
-                    <p class="subtitle">Heritage Reimagined</p>
-                    <div class="instructions">
-                        <div class="power-item">
-                            <img src="/assets/textures/congkak/guli_blue.png" class="guli-icon"> <b>Blue:</b> Extra
-                            Turn
-                        </div>
-                        <div class="power-item">
-                            <img src="/assets/textures/congkak/guli_yellow.png" class="guli-icon"> <b>Yellow:</b>
-                            Double Points
-                        </div>
-                        <div class="power-item">
-                            <img src="/assets/textures/congkak/guli_red.png" class="guli-icon"> <b>Red:</b> Speed Boost
-                        </div>
-                        <div class="power-item">
-                            <img src="/assets/textures/congkak/guli_white.png" class="guli-icon"> <b>White:</b> Guli
-                            Magnet
+                    <p class="subtitle italic">Heritage Reimagined</p>
+                    <div class="instructions-mobile-wrap">
+                        <div class="instructions">
+                            <div class="power-item">
+                                <img src="/assets/textures/congkak/guli_blue.png" class="guli-icon"> <span><b>Blue:</b>
+                                    Steal 3 Gulis</span>
+                            </div>
+                            <div class="power-item">
+                                <img src="/assets/textures/congkak/guli_yellow.png" class="guli-icon">
+                                <span><b>Yellow:</b> Double Points</span>
+                            </div>
+                            <div class="power-item">
+                                <img src="/assets/textures/congkak/guli_red.png" class="guli-icon"> <span><b>Red:</b>
+                                    Speed Boost</span>
+                            </div>
+                            <div class="power-item">
+                                <img src="/assets/textures/congkak/guli_white.png" class="guli-icon">
+                                <span><b>White:</b> Guli Magnet</span>
+                            </div>
                         </div>
                     </div>
                     <button id="start-btn" class="primary-btn">START</button>
@@ -416,6 +465,58 @@
                     <p>Ini bukan guli sebenar...</p>
                     <button id="scam-close" class="primary-btn">Aduhai...</button>
                 </div>
+            </div>
+
+            <!-- ======== MOBILE HUB MENU ======== -->
+            <div id="mobile-hub-menu" class="overlay hidden">
+                <div class="hub-container">
+                    <h3 class="hub-title">CONTROL CENTER</h3>
+                    <div class="hub-grid">
+                        <button class="hub-item nav-link-missions">
+                            <span class="hub-icon"><i data-lucide="scroll"></i></span>
+                            <span class="hub-label">QUESTS</span>
+                        </button>
+                        <button class="hub-item nav-link-rank">
+                            <span class="hub-icon"><i data-lucide="trophy"></i></span>
+                            <span class="hub-label">RANKINGS</span>
+                        </button>
+                        <button class="hub-item nav-link-joystick">
+                            <span class="hub-icon"><i data-lucide="gamepad-2"></i></span>
+                            <span class="hub-label">JOYSTICK</span>
+                        </button>
+                        <button class="hub-item nav-link-help">
+                            <span class="hub-icon"><i data-lucide="help-circle"></i></span>
+                            <span class="hub-label">GUIDE</span>
+                        </button>
+                    </div>
+                    <button id="close-hub-btn" class="hub-close">CLOSE</button>
+                </div>
+            </div>
+
+            <!-- ======== MOBILE BOTTOM NAV ======== -->
+            <div id="mobile-bottom-nav">
+                <button class="mobile-nav-item nav-link-play">
+                    <span class="mobile-nav-icon"><i data-lucide="play-circle"></i></span>
+                    <span class="mobile-nav-label">PLAY</span>
+                </button>
+                <button class="mobile-nav-item nav-link-map">
+                    <span class="mobile-nav-icon"><i data-lucide="map"></i></span>
+                    <span class="mobile-nav-label">MAP</span>
+                </button>
+                <div class="mobile-hub-trigger" id="hub-trigger-btn">
+                    <div class="hub-btn-inner">
+                        <span class="hub-main-icon"><i data-lucide="layout-grid"></i></span>
+                    </div>
+                    <span class="mobile-nav-label" style="margin-top:4px">HUB</span>
+                </div>
+                <button class="mobile-nav-item nav-link-inventory">
+                    <span class="mobile-nav-icon"><i data-lucide="shopping-bag"></i></span>
+                    <span class="mobile-nav-label">BAG</span>
+                </button>
+                <button class="mobile-nav-item nav-link-history">
+                    <span class="mobile-nav-icon"><i data-lucide="history"></i></span>
+                    <span class="mobile-nav-label">RECORDS</span>
+                </button>
             </div>
 
         </div> <!-- end ui-layer -->

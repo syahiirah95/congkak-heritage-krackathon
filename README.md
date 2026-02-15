@@ -1,18 +1,47 @@
-# 🏆 Krackathon: Heritage Reimagined
+# 🏆 Krackathon 2026: The 24-Hour Build
 
-## 📜 The Challenge: Prompt 02
-> "Breathe new life into Malaysia's rich cultural legacy by developing a web-based game inspired by traditional pastimes (e.g., Congkak, Gasing, Batu Seremban, or Wau Bulan)."
+**Timeframe:** 
+> 📅 **14 Feb 2026 (11:00 AM)** — **15 Feb 2026 (11:00 AM)**
+
+---
+
+## 🛠️ The Challenge Prompts
+Participants were asked to choose between two distinct directions:
+
+### **Prompt 01: Community Utility**
+> *"Solve One Real Malaysian Problem: Build a Digital Community Utility that Makes Everyday Life Easier."*
+> 
+> **Context:** Millions of Malaysians deal with small but real challenges daily. This prompt challenges devs to build something practical, usable, and community-centered.
+
+### **Prompt 02: Heritage Reimagined (SELECTED)**
+> *"Let's create a game — Heritage Reimagined!"*
+> 
+> **The Challenge:** Breathe new life into Malaysia's rich cultural legacy by developing a web-based game inspired by traditional pastimes (e.g., Congkak, Gasing, Batu Seremban, or Wau Bulan). 
+> 
+> **The Mission:** Preserve the soul of the original game while introducing a clever modern twist through innovative mechanics, unconventional level design, or unique storytelling.
+
+---
+
+# 🎮 Project: Congkak Quest - Heritage Reimagined
+
+**Short Description (Punchline):** 
+> *Malaysian Heritage meets modern RPG: An open-world 3D adventure where traditional Congkak strategy fuels your journey through legend.*
+
+**Quick Pitch:**
+Congkak Quest is "cracked" because it transforms a 5-minute board game into a **persistant 3D world adventure**. We’ve stripped away the static board and replaced it with a living kampung (village) where you must manage **Energy systems**, chase **fleeing animals**, and hunt for **Mythic Gulis** with unique board-game powers. By merging **Three.js exploration** with a **Supabase-backed competitive leaderboard**, we've turned a cultural relic into a high-stakes, roguelike strategy experience that honors the past while dominating the modern browser.
+
+---
 
 ## ✅ Krackathon Alignment Checklist
 We have reimagined the traditional game of **Congkak** by mapping its evolution to the specific innovation categories requested in the hackathon brief:
 
 | Innovation Category | Our Implementation (Congkak Quest) | Status |
 | :--- | :--- | :---: |
-| **01 Environmental & Dynamic Boards** | **Dynamic Seed Physics**: Introduced **Special Gulis** with unique properties. Blue Guli (Extra Turn/Speed) and Black Guli (Heritage Shadow) transform the static board into a dynamic tactical field. | [x] |
-| **02 Roguelike or Progression Mechanics** | **Large-Scale Adventure**: Turned the short 5-minute Congkak session into a **Long-form 3D Adventure**. Players must explore the village, interact with Tok Aki, and "farm" gulis to progress. | [x] |
-| **03 Rhythm & Precision Integration** | **Mechanical Precision**: Merged traditional board play with an **Exploration Scavenger Hunt**, requiring precision in finding hidden assets and strategic distribution of seeds. | [x] |
-| **04 Asymmetrical Dynamics** | **Smart AI Strategist**: Implemented a "Master vs Apprentice" dynamic where Tok Aki (AI) uses an asymmetrical weighted strategy to challenge the player's collection-based progression. | [x] |
-| **Bonus: Technical Excellence** | **Seamless Browser Performance**: Optimized Three.js rendering and custom collision engines ensure a "Vite-fast" 60FPS experience on mobile browsers. | [x] |
+| **01 Environmental & Dynamic Boards** | **Reactive Environments**: Beyond the 3D board, we introduced **Special Gulis** (Blue for Stealing Seeds, Black for Mythic Scoring) and dangerous **Multicolor SCAM Gulis** (Traps) that mimic resources but drain energy, turning collection into a high-stakes challenge. | ✅ |
+| **02 Roguelike or Progression Mechanics** | **Persistent Progression**: Implemented a full RPG loop with **XP, Coins, and Guli inventory** synced to Supabase. Includes a **Daily Energy Refill** system and branch-based missions that unlock competitive play. | ✅ |
+| **03 Interaction & Precision** | **Active Resource Catching**: Instead of static pickups, players must successfully chase down **fleeing animals (cow, cat, chicken)** to recover energy. This adds a "precision chase" layer to the traditional exploration loop. | ✅ |
+| **04 Asymmetrical Dynamics** | **Multi-Tiered AI Strategist**: Introduced scalable AI (Easy to Hard). At higher levels, Tok Aki (AI) uses predictive "Tembak" (Capture) logic and prioritized "Extra Turn" sequences to outmaneuver the player. | ✅ |
+| **Bonus: Technical Excellence** | **Agentic Cloud Integration**: High-performance Three.js village at 60FPS with **Real-time Global Leaderboards** and Google OAuth persistence using a scalable Supabase architecture. | ✅ |
 
 ---
 
@@ -41,14 +70,30 @@ This project was developed using a cutting-edge **Vibe Coding** workflow, combin
 
 ---
 
-## 🏆 The Path to Championship
-In this reimagined heritage experience, players don't just jump into a game. They must prove their worth through collection, survival, and mastery.
+## 🕹️ Game Controls
+
+Explore the 3D Village and master the board with these controls:
+
+| Mode | Action | Input |
+| :--- | :--- | :--- |
+| **3D Exploration** | **Movement** | `W`, `A`, `S`, `D` or **On-Screen Joystick** |
+| | **Interaction** | Click/Tap NPCs or Quest Marks (**!**) |
+| | **Catch Animals** | Walk within **1.5 units** of an animal |
+| | **Camera** | Drag mouse / Touch screen to look around |
+| **2D Congkak** | **Select Hole** | Click/Tap any kampung hole on **your side** |
+| | **Inspect Hole** | Hover mouse over any hole for guli details |
+| | **Exit Match** | Click the `✘` button at the top right |
 
 ---
 
 ## ⚡ Energy System (Tenaga)
 
 Energy is the core survival resource. Players start with **100 Energy** (100%). Collecting gulis costs energy, so players must manage their stamina wisely.
+
+### 📅 Daily Energy Refill
+Running low on energy? Don't worry!
+- **Auto-Refill**: Every new calendar day you log in, your energy is automatically topped up to **100 ⚡**.
+- **Exploration**: Restore energy instantly by catching animals or discovering Story Points around the village.
 
 ### 🔮 Guli Collection — Energy Cost
 
@@ -57,7 +102,7 @@ Energy is the core survival resource. Players start with **100 Energy** (100%). 
 | **White** | ⚪ White | Common | **2** ⚡ | 10 XP | Standard (1 pt) |
 | **Yellow** | 🟡 Yellow | Uncommon | **4** ⚡ | 25 XP | Strategic (2 pts) |
 | **Red** | 🔴 Red | Rare | **6** ⚡ | 50 XP | High Value (3 pts) |
-| **Blue** |  Blue | Epic | **8** ⚡ | 100 XP | Extra Turn (Bonus) |
+| **Blue** |  Blue | Epic | **8** ⚡ | 100 XP | Thief Guli (Steal 3 pts) |
 | **Black** | ⚫ Black | Mythic | **10** ⚡ | 250 XP | Heritage Shadow (5 pts) |
 | **Scam** | 🟣 Purple | ⚠️ TRAP | **15** ⚡ | 0 XP | **SCAM!** Wastes energy, gives nothing |
 | **Scam** | 🟢 Green | ⚠️ TRAP | **12** ⚡ | 0 XP | **SCAM!** Disguised as "nature" guli |
@@ -174,12 +219,22 @@ Once you have amassed 49 gulis, the "CHALLENGE TOK AKI" button unlocks. These 49
 
 ## 🎮 Game Rules & Logic
 
-### Scoring System
-- **Black**: 5 Points (Mythic value)
-- **White**: 1 Point (Base value)
-- **Yellow**: 2 Points (Strategic value)
-- **Red**: 3 Points (High value)
-- **Blue**: 1 Point + **EXTRA TURN** (When it lands in your store/rumah)
+### Scoring System & Victory Conditions
+
+Congkak Quest uses a **Two-Tier Scoring** system to balance real-time clarity with end-game strategy:
+
+1.  **In-Game Scoreboard (Visual)**: During gameplay, the counter displays a simple **1-to-1 guli count**. If you have 10 gulis in your house, the score shows 10. This ensures you can easily track the physical flow of the game.
+2.  **Final Marks (Weighted)**: Once the game ends, the final victory is determined by the **Rarity Weight** of your collected gulis. This is where your adventure phase yields its true reward:
+
+| Guli Type | Final Point Value | Special Property |
+| :--- | :---: | :--- |
+| **Black (Mythic)** | **5 pts** | Highest strategic value |
+| **Red (Rare)** | **3 pts** | High tier multiplier |
+| **Yellow (Uncommon)** | **2 pts** | Strategic advantage |
+| **White (Common)** | **1 pt** | Standard value |
+| **Blue (Epic)** | **1 pt** | **EXTRA TURN** (Langkah Kanan) |
+
+> **Strategic Impact**: A player with only 10 Black gulis (50 pts) will defeat a player with 40 White gulis (40 pts). *Quality over quantity!*
 
 ### Core Mechanics
 - **Sowing**: Players move clockwise, dropping one guli into each hole.
@@ -198,7 +253,15 @@ Hover your mouse over any hole to see a detailed breakdown of the guli distribut
 - **Google OAuth**: Sign in with Google to save your progress.
 - **Leaderboard**: Real-time ranking panel visible during gameplay (🏆 RANK in the nav bar).
 - **Auto-Profile**: Profiles are automatically created on first login.
-- **Match History**: Every Congkak match is recorded with scores, gulis won, and coins earned.
+- **Match History**: Every Congkak match is recorded in a detailed logs panel (🏆 HISTORY). It tracks your weighted score vs Tok Aki, gulis won, and rewards earned.
+
+---
+
+## 🏺 Heritage Highlights
+*Congkak Quest* isn't just a simulation; it's a digital archive of Malay culture. During your journey, you will discover:
+- **Etymology of 'Mencongak'**: Learn how the word for mental calculation is deeply tied to the Sultanate of Malacca's merchant history.
+- **The Philosophy of 'Lubang Induk'**: Discover why the Mother storehouse represents the concept of *rezeki* (sustenance) and community sowing.
+- **Material Evolution**: Explore the transition from original seed types (rubber seeds, shells) to the modern aesthetics of heritage wood carvings (Cengal & Mahogany).
 
 ---
 

@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS congkakheritage_profiles (
   total_matches INTEGER DEFAULT 0,
 
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  last_energy_refill TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- 2. Match History Table
@@ -44,7 +45,7 @@ CREATE TABLE IF NOT EXISTS congkakheritage_match_history (
   match_date TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Leaderboard View (aggregated from match_history + profiles)
+-- 3. Leaderboard View (aggregated from profiles based on XP and match history)
 CREATE OR REPLACE VIEW congkakheritage_leaderboard AS
 SELECT
   p.id,
@@ -55,9 +56,9 @@ SELECT
   p.total_matches,
   p.xp,
   p.current_level,
-  RANK() OVER (ORDER BY p.high_score DESC, p.total_wins DESC) as rank
+  RANK() OVER (ORDER BY p.xp DESC, p.high_score DESC) as rank
 FROM congkakheritage_profiles p
-WHERE p.total_matches > 0
+WHERE p.xp > 0 OR p.total_matches > 0
 ORDER BY rank ASC
 LIMIT 100;
 

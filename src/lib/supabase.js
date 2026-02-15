@@ -45,23 +45,50 @@ export async function loadProfile(userId) {
         .select('*')
         .eq('id', userId)
         .single();
-    // If profile doesn't exist (e.g. user from another project on same Supabase), create it
-    if (error && error.code === 'PGRST116') {
-        const { data: user } = await supabase.auth.getUser();
-        const meta = user?.user?.user_metadata || {};
-        const { data: newProfile, error: insertErr } = await supabase
+    if (error) {
+        if (error.code === 'PGRST116') {
+            const { data: user } = await supabase.auth.getUser();
+            const meta = user?.user?.user_metadata || {};
+            const { data: newProfile, error: insertErr } = await supabase
+                .from('congkakheritage_profiles')
+                .upsert({
+                    id: userId,
+                    name: meta.full_name || 'Pemain',
+                    avatar_url: meta.avatar_url || '',
+                    last_energy_refill: new Date().toISOString()
+                }, { onConflict: 'id' })
+                .select()
+                .single();
+            if (insertErr) console.error('Auto-create profile error:', insertErr.message);
+            return newProfile;
+        }
+        console.error('Load profile error:', error.message);
+        return null;
+    }
+
+    // --- DAILY ENERGY REFILL LOGIC ---
+    const lastRefill = new Date(data.last_energy_refill || data.created_at);
+    const now = new Date();
+
+    // Check if it's a new day (local time)
+    const isNewDay = now.toDateString() !== lastRefill.toDateString();
+
+    if (isNewDay) {
+        const { data: updatedData, error: refillErr } = await supabase
             .from('congkakheritage_profiles')
-            .upsert({
-                id: userId,
-                name: meta.full_name || 'Pemain',
-                avatar_url: meta.avatar_url || ''
-            }, { onConflict: 'id' })
+            .update({
+                energy: 100,
+                last_energy_refill: now.toISOString(),
+                updated_at: now.toISOString()
+            })
+            .eq('id', userId)
             .select()
             .single();
-        if (insertErr) console.error('Auto-create profile error:', insertErr.message);
-        return newProfile;
+
+        if (!refillErr) return updatedData;
+        console.error('Daily refill error:', refillErr.message);
     }
-    if (error) console.error('Load profile error:', error.message);
+
     return data;
 }
 
@@ -69,8 +96,11 @@ export async function updateProfile(userId, updates) {
     if (!supabase) return;
     const { error } = await supabase
         .from('congkakheritage_profiles')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', userId);
+        .upsert({
+            id: userId,
+            ...updates,
+            updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
     if (error) console.error('Update profile error:', error.message);
 }
 

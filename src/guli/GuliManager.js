@@ -12,7 +12,10 @@ export class GuliManager {
         this.inventory = { black: 0, blue: 0, yellow: 0, red: 0, white: 0 };
         this.xp = 0;
         this.xpRewards = { black: 250, blue: 100, red: 50, yellow: 25, white: 10 };
-        this.energyCost = { white: 1, yellow: 1, red: 1, blue: 1, black: 1, scam: 5, scam_green: 5, scam_orange: 5, scam_brown: 5, scam_pink: 5 };
+        this.energyCost = {
+            white: 2, yellow: 4, red: 6, blue: 8, black: 10,
+            scam: 15, scam_green: 12, scam_orange: 10, scam_brown: 8, scam_pink: 14
+        };
         this.scamTypes = ['scam', 'scam_green', 'scam_orange', 'scam_brown', 'scam_pink'];
 
         this.textures = {};
@@ -27,6 +30,8 @@ export class GuliManager {
         this.textures['scam_orange'] = null;
         this.textures['scam_brown'] = null;
         this.textures['scam_pink'] = null;
+        this.score = 0; // Initialize score
+        this.targetScore = 49;
 
         this.glowTexture = this.createGlowTexture();
 
@@ -131,10 +136,9 @@ export class GuliManager {
             if (g.collected) return;
 
             // Guli is STATIC — no rotation, no bobbing
+            // Collection — increased threshold for better feel
             const dist = p.distanceTo(g.group.position);
-
-            // Collection — player walks to guli
-            if (dist < 2.2) this.collect(g);
+            if (dist < 2.8) this.collect(g);
         });
     }
 
@@ -145,7 +149,10 @@ export class GuliManager {
         if (!guli.type.startsWith('scam')) {
             const cost = this.energyCost[guli.type] ?? 1;
             const energyEl = document.getElementById('energy-val');
-            const currentEnergy = parseInt(energyEl?.textContent || '0');
+            // More robust parsing in case of icons/text
+            const energyText = energyEl?.textContent || '0';
+            const currentEnergy = parseInt(energyText.replace(/[^0-9]/g, '')) || 0;
+
             if (currentEnergy < cost) {
                 this.showEnergyWarning();
                 return; // Don't collect, don't animate
@@ -268,7 +275,7 @@ export class GuliManager {
     }
 
     getTotalGulis() {
-        return Object.values(this.inventory).reduce((sum, v) => sum + v, 0);
+        return Object.values(this.inventory).reduce((sum, v) => sum + (Number(v) || 0), 0);
     }
 
     triggerScamUI(position) {

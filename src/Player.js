@@ -14,9 +14,9 @@ export class Player {
 
         // Movement state
         this.keys = {};
-        this.speed = 0.15;
-        this.baseSpeed = 0.15;
-        this.rotationSpeed = 0.003;
+        this.speed = 0.14;       // Increased speed for better feel
+        this.baseSpeed = 0.14;
+        this.rotationSpeed = 0.006;
 
         // Physics/Minecraft-style
         this.velocity = new THREE.Vector3();
@@ -29,9 +29,15 @@ export class Player {
         this.zoomDistance = 6;
         this.minZoom = 3;
         this.maxZoom = 15;
-        this.cameraOffset = new THREE.Vector3(0, 3, -this.zoomDistance);
-        this.currentCameraPos = new THREE.Vector3();
-        this.currentLookAt = new THREE.Vector3();
+        this.cameraOffset = new THREE.Vector3(0, 3, -this.zoomDistance); // Camera state
+        this.currentCameraPos = new THREE.Vector3(0, 10, 20);
+        this.currentLookAt = new THREE.Vector3(0, 0, 0);
+        this.firstUpdate = true;
+
+        // Joystick state
+        this.joystickDelta = { x: 0, y: 0 };
+        this.isJoystickActive = false;
+        this.lastTouchX = 0;
 
         // Mouse look state
         this.isPointerLocked = false;
@@ -91,6 +97,7 @@ export class Player {
             }
         });
         window.addEventListener('keyup', (e) => this.keys[e.code] = false);
+        window.addEventListener('blur', () => { this.keys = {}; }); // Safety reset
 
         // Drag to rotate logic
         window.addEventListener('mousedown', (e) => {
@@ -106,10 +113,11 @@ export class Player {
         });
 
         window.addEventListener('mousemove', (e) => {
-            // Rotate camera/player only when left mouse is held OR if pointer is locked (optional)
             if (this.isMouseDown || this.isPointerLocked) {
-                this.mesh.rotation.y -= e.movementX * this.rotationSpeed;
+                const movX = this.isPointerLocked ? e.movementX : (e.clientX - (this.lastMouseX || e.clientX));
+                this.mesh.rotation.y -= movX * this.rotationSpeed;
             }
+            this.lastMouseX = e.clientX;
         });
 
         const canvas = document.querySelector('#bg');
@@ -129,6 +137,83 @@ export class Player {
             this.zoomDistance += e.deltaY * 0.01;
             this.zoomDistance = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoomDistance));
         });
+
+        this.initJoystick();
+        this.initTouchRotation();
+    }
+
+    initJoystick() {
+        const zone = document.getElementById('joystick-zone');
+        if (!zone) return;
+
+        zone.innerHTML = `
+            <div class="joystick-base"></div>
+            <div class="joystick-thumb" id="joystick-thumb"></div>
+        `;
+
+        const thumb = document.getElementById('joystick-thumb');
+        const maxRadius = 40;
+        let active = false;
+
+        const handleMove = (clientX, clientY) => {
+            if (!active) return;
+            const rect = zone.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            let dx = clientX - centerX;
+            let dy = clientY - centerY;
+
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > maxRadius) {
+                dx *= maxRadius / dist;
+                dy *= maxRadius / dist;
+            }
+
+            thumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+
+            this.joystickDelta.x = dx / maxRadius;
+            this.joystickDelta.y = dy / maxRadius;
+            this.isJoystickActive = true;
+        };
+
+        const start = (e) => {
+            active = true;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            handleMove(clientX, clientY);
+        };
+
+        const stop = () => {
+            active = false;
+            thumb.style.transform = `translate(-50%, -50%)`;
+            this.joystickDelta.x = 0;
+            this.joystickDelta.y = 0;
+            this.isJoystickActive = false;
+        };
+
+        zone.addEventListener('touchstart', (e) => { e.preventDefault(); start(e); });
+        zone.addEventListener('touchmove', (e) => { e.preventDefault(); handleMove(e.touches[0].clientX, e.touches[0].clientY); });
+        zone.addEventListener('touchend', stop);
+
+        zone.addEventListener('mousedown', (e) => { if (e.button === 0) start(e); });
+        window.addEventListener('mousemove', (e) => { if (active) handleMove(e.clientX, e.clientY); });
+        window.addEventListener('mouseup', stop);
+    }
+
+    initTouchRotation() {
+        window.addEventListener('touchstart', (e) => {
+            if (e.target.closest('#joystick-zone') || e.target.closest('.ui-interactable') || e.target.closest('button')) return;
+            this.lastTouchX = e.touches[0].clientX;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (e.target.closest('#joystick-zone') || e.target.closest('.ui-interactable') || e.target.closest('button')) return;
+            const touch = e.touches[0];
+            const dx = touch.clientX - this.lastTouchX;
+            this.mesh.rotation.y -= dx * this.rotationSpeed * 0.8;
+            this.lastTouchX = touch.clientX;
+        });
     }
 
 
@@ -141,14 +226,21 @@ export class Player {
         if (this.keys['KeyA'] || this.keys['ArrowLeft']) moveSide = 1;
         if (this.keys['KeyD'] || this.keys['ArrowRight']) moveSide = -1;
 
+        // Joystick Override
+        if (this.isJoystickActive) {
+            moveForward = -this.joystickDelta.y;
+            moveSide = -this.joystickDelta.x;
+        }
+
         // Apply WASD Movement relative to rotation
         if (moveForward !== 0 || moveSide !== 0) {
             const moveDir = new THREE.Vector3(moveSide, 0, moveForward);
             moveDir.applyQuaternion(this.mesh.quaternion);
             moveDir.normalize();
 
-            // Movement without collision (ghost mode)
-            const nextPos = this.mesh.position.clone().addScaledVector(moveDir, this.speed);
+            // Movement with dt normalization (target 60fps)
+            const frameSpeed = this.speed * dt * 60;
+            const nextPos = this.mesh.position.clone().addScaledVector(moveDir, frameSpeed);
             this.mesh.position.copy(nextPos);
 
             const time = Date.now() * 0.01;
@@ -181,7 +273,14 @@ export class Player {
         const idealLookAt = this.mesh.position.clone();
         idealLookAt.y += 1.5;
 
-        const t = 1.0 - Math.pow(0.01, dt);
+        // Snap on first update to avoid "flying in from origin"
+        if (this.firstUpdate) {
+            this.currentCameraPos.copy(idealOffset);
+            this.currentLookAt.copy(idealLookAt);
+            this.firstUpdate = false;
+        }
+
+        const t = 1.0 - Math.pow(0.001, dt); // Faster camera follow
         this.currentCameraPos.lerp(idealOffset, t);
         this.currentLookAt.lerp(idealLookAt, t);
 

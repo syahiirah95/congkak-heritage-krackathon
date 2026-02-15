@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import confetti from 'canvas-confetti';
 import { Player } from './src/Player.js';
 import { World } from './src/world/World.js';
 import { GuliManager } from './src/guli/GuliManager.js';
@@ -37,6 +38,7 @@ class Game {
         this.difficulty = 'normal';
         this.rewards = { easy: 50, normal: 100, hard: 150 };
         this.penalty = 10;
+        this.joystickEnabled = true; // Manual toggle state
 
         // Lazy load Tok Aki
         if (this.world) {
@@ -56,6 +58,7 @@ class Game {
 
         this.setupAuth();
         this.updateUIVisibility();
+        if (window.lucide) lucide.createIcons();
         this.animate();
     }
 
@@ -84,8 +87,11 @@ class Game {
         if (logoutBtn) logoutBtn.addEventListener('click', async () => {
             try { await signOut(); this.onUserLogout(); } catch (e) { }
         });
-        const lbBtn = document.getElementById('nav-settings');
-        if (lbBtn) lbBtn.addEventListener('click', () => this.toggleLeaderboard());
+        const rankBtn = document.getElementById('nav-rank');
+        if (rankBtn) rankBtn.addEventListener('click', () => this.toggleLeaderboard());
+
+        const histBtn = document.getElementById('nav-history');
+        if (histBtn) histBtn.addEventListener('click', () => this.toggleHistory());
     }
 
     async onUserLogin(user) {
@@ -98,7 +104,7 @@ class Game {
                 this.guliManager.updateHUD();
             }
             const coinEl = document.getElementById('coin-val');
-            if (coinEl) coinEl.textContent = profile.coins ?? 150;
+            if (coinEl) coinEl.textContent = profile.coins ?? 0;
             const energyEl = document.getElementById('energy-val');
             if (energyEl) energyEl.textContent = profile.energy ?? 100;
             this.guliManager.xp = profile.xp || 0;
@@ -112,6 +118,10 @@ class Game {
         if (loginBtn) loginBtn.classList.add('hidden');
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) logoutBtn.classList.remove('hidden');
+
+        // Auto-refresh panels on login
+        this.refreshLeaderboard();
+        this.refreshHistory();
     }
 
     onUserLogout() {
@@ -131,42 +141,74 @@ class Game {
         if (!panel) return;
         const isHidden = panel.classList.toggle('hidden');
         if (!isHidden) {
-            // Panel just opened — fetch fresh data
-            const tbody = document.getElementById('leaderboard-body');
-            if (!tbody) return;
-            tbody.innerHTML = '<tr><td colspan="4" style="padding:12px;text-align:center;opacity:0.5">Loading...</td></tr>';
-            const data = await getLeaderboard();
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="padding:12px;text-align:center;opacity:0.5">Tiada data lagi</td></tr>';
-                return;
-            }
-            tbody.innerHTML = data.map((row, i) => `
-                <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
-                    <td style="padding:6px 4px;color:var(--primary);font-weight:900">${row.rank || i + 1}</td>
-                    <td style="padding:6px 4px"><img src="${row.avatar_url || ''}" style="width:18px;height:18px;border-radius:50%;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'">${row.name || 'Pemain'}</td>
-                    <td style="padding:6px 4px">${row.high_score}</td>
-                    <td style="padding:6px 4px">${row.total_wins}/${row.total_matches}</td>
-                </tr>
-            `).join('');
+            this.refreshLeaderboard();
         }
     }
 
     async refreshLeaderboard() {
         const tbody = document.getElementById('leaderboard-body');
         if (!tbody) return;
+
+        // Optionally show loading if it's currently empty
+        if (tbody.innerHTML.includes('Tiada data lagi')) {
+            tbody.innerHTML = '<tr><td colspan="5" style="padding:12px;text-align:center;opacity:0.5">Loading...</td></tr>';
+        }
+
         const data = await getLeaderboard();
         if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="padding:12px;text-align:center;opacity:0.5">Tiada data lagi</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="padding:12px;text-align:center;opacity:0.5">Tiada data lagi</td></tr>';
             return;
         }
+
         tbody.innerHTML = data.map((row, i) => `
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
-                <td style="padding:6px 4px;color:var(--primary);font-weight:900">${row.rank || i + 1}</td>
-                <td style="padding:6px 4px"><img src="${row.avatar_url || ''}" style="width:18px;height:18px;border-radius:50%;vertical-align:middle;margin-right:4px" onerror="this.style.display='none'">${row.name || 'Pemain'}</td>
-                <td style="padding:6px 4px">${row.high_score}</td>
-                <td style="padding:6px 4px">${row.total_wins}/${row.total_matches}</td>
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.05); white-space: nowrap;">
+                <td style="padding:8px 4px;color:var(--primary);font-weight:900">${row.rank || i + 1}</td>
+                <td style="padding:8px 4px; display: flex; align-items: center; gap: 6px;">
+                    <img src="${row.avatar_url || ''}" style="width:22px;height:22px;border-radius:50%;border:1px solid rgba(255,255,255,0.1)" onerror="this.style.display='none'">
+                    <span style="max-width: 120px; overflow: hidden; text-overflow: ellipsis;">${row.name || 'Pemain'}</span>
+                </td>
+                <td style="padding:8px 4px;color:#ffd700;font-weight:700">${row.xp || 0}</td>
+                <td style="padding:8px 4px;opacity:0.9">${row.high_score || 0}</td>
+                <td style="padding:8px 4px;opacity:0.9">${row.total_wins || 0}/${row.total_matches || 0}</td>
             </tr>
         `).join('');
+    }
+
+    async toggleHistory() {
+        const panel = document.getElementById('history-panel');
+        if (!panel) return;
+        const isHidden = panel.classList.toggle('hidden');
+        if (!isHidden) {
+            this.refreshHistory();
+        }
+    }
+
+    async refreshHistory() {
+        if (!this.currentUser) return;
+        const tbody = document.getElementById('history-body');
+        if (!tbody) return;
+
+        const { getMatchHistory } = await import('./src/lib/supabase.js');
+        const history = await getMatchHistory(this.currentUser.id);
+
+        if (!history || history.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="padding:12px;text-align:center;opacity:0.5">Tiada rekod lagi</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = history.map(row => {
+            const date = new Date(row.match_date).toLocaleDateString();
+            const resultColor = row.won ? '#4ade80' : '#f87171';
+            const resultText = row.won ? 'WIN' : 'LOSS';
+            return `
+                <tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                    <td style="padding:6px 4px;opacity:0.7">${date}</td>
+                    <td style="padding:6px 4px;color:${resultColor};font-weight:800">${resultText}</td>
+                    <td style="padding:6px 4px;font-weight:700">${row.player_score} vs ${row.ai_score}</td>
+                    <td style="padding:6px 4px;color:#ffd700">+${row.coins_earned}🪙</td>
+                </tr>
+            `;
+        }).join('');
     }
 
     init() {
@@ -193,8 +235,12 @@ class Game {
         sunLight.shadow.mapSize.height = 2048;
         this.scene.add(sunLight);
 
+        // Fixed Fog: density was way too high (0.012 -> 0.0025)
+        this.scene.fog = new THREE.FogExp2(0xd4a373, 0.0025);
+
         this.world = new World(this.scene);
         this.player = new Player(this.scene, this.camera);
+        this.player.mesh.position.y = 0.1; // Spawn slightly above to avoid sticking
         this.congkakEngine = new CongkakEngine();
         this.guliManager = new GuliManager(this.scene, this.player, this.congkakEngine, this.world);
         this.congkakBoard = new CongkakBoard(this.scene, this.camera, this.player);
@@ -203,15 +249,19 @@ class Game {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.resizeScaleOverlays();
         });
     }
 
     setupEvents() {
-        // Main Menu -> Explore directly (story is triggered by Tok Aki)
+        // Main Menu -> Explore directly
         const startBtn = document.getElementById('start-btn');
         startBtn.addEventListener('click', () => {
             document.getElementById('main-menu').classList.add('hidden');
             this.audioManager.start();
+
+            // Set state first to enable update loop
+            this.gameState = 'EXPLORE';
 
             // Go straight to exploration — spawn gulis
             const level = this.levels[0];
@@ -220,12 +270,16 @@ class Game {
             this.guliManager.updateHUD();
 
             this.startLevel(this.currentLevelIdx);
+
+            // Force focus back to window for keyboard input
+            window.focus();
         });
 
-        // Map Button (Bottom Nav)
-        document.getElementById('nav-map').addEventListener('click', () => {
-            const map = document.getElementById('world-map');
-            map.classList.toggle('hidden');
+        // Map Button Toggle
+        document.querySelectorAll('.nav-link-map').forEach(el => {
+            el.addEventListener('click', () => {
+                document.getElementById('world-map')?.classList.toggle('hidden');
+            });
         });
 
         // Level Nodes in Map
@@ -239,16 +293,18 @@ class Game {
             });
         });
 
-        // Inventory Toggle (Bottom Nav)
-        document.getElementById('nav-inventory').addEventListener('click', () => {
-            const vault = document.getElementById('guli-vault-mini');
-            vault.classList.toggle('hidden');
+        // Inventory Toggle
+        document.querySelectorAll('.nav-link-inventory').forEach(el => {
+            el.addEventListener('click', () => {
+                document.getElementById('guli-vault-mini')?.classList.toggle('hidden');
+            });
         });
 
-        // Missions Toggle (Bottom Nav)
-        document.getElementById('nav-missions').addEventListener('click', () => {
-            const bounty = document.getElementById('bounty-hud');
-            bounty.classList.toggle('hidden');
+        // Missions Toggle
+        document.querySelectorAll('.nav-link-missions').forEach(el => {
+            el.addEventListener('click', () => {
+                document.getElementById('bounty-hud')?.classList.toggle('hidden');
+            });
         });
 
         // Win Screen -> Next Level
@@ -273,15 +329,76 @@ class Game {
         });
 
         const challengeBtn = document.getElementById('start-congkak-btn');
-        const navPlay = document.getElementById('nav-play');
-
         const triggerCongkak = () => {
             const selector = document.getElementById('difficulty-selector');
             if (selector) selector.classList.remove('hidden');
         };
 
         if (challengeBtn) challengeBtn.addEventListener('click', () => triggerCongkak());
-        if (navPlay) navPlay.addEventListener('click', () => triggerCongkak());
+        document.querySelectorAll('.nav-link-play').forEach(el => {
+            el.addEventListener('click', () => triggerCongkak());
+        });
+
+        // HUB Toggle
+        const hubBtn = document.getElementById('hub-trigger-btn');
+        const hubMenu = document.getElementById('mobile-hub-menu');
+        if (hubBtn && hubMenu) {
+            hubBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                hubMenu.classList.remove('hidden');
+            });
+        }
+
+        document.getElementById('close-hub-btn')?.addEventListener('click', () => {
+            hubMenu.classList.add('hidden');
+        });
+
+        // Close hub when any link inside is clicked
+        hubMenu?.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => hubMenu.classList.add('hidden'));
+        });
+
+        // Joystick Toggle Logic
+        const toggleJoystick = () => {
+            this.joystickEnabled = !this.joystickEnabled;
+            this.updateUIVisibility();
+        };
+
+        document.querySelectorAll('.nav-link-joystick').forEach(el => {
+            el.addEventListener('click', () => toggleJoystick());
+        });
+
+        const deskJoyBtn = document.getElementById('nav-joystick');
+        if (deskJoyBtn) deskJoyBtn.addEventListener('click', () => toggleJoystick());
+
+        // Rank Toggle
+        document.querySelectorAll('.nav-link-rank').forEach(el => {
+            el.addEventListener('click', () => {
+                this.toggleLeaderboard();
+            });
+        });
+
+        // History Toggle
+        document.querySelectorAll('.nav-link-history').forEach(el => {
+            el.addEventListener('click', () => {
+                this.toggleHistory();
+            });
+        });
+
+        // HUD Visibility Toggle (Eye icon)
+        document.getElementById('hud-toggle-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.body.classList.toggle('hud-hidden');
+            const btn = e.currentTarget;
+            const isHidden = document.body.classList.contains('hud-hidden');
+
+            // Update Lucide icon
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.setAttribute('data-lucide', isHidden ? 'eye-off' : 'eye');
+                if (window.lucide) lucide.createIcons();
+            }
+        });
 
         // Minigame Selection logic (for when people click cards in main menu)
         const selectQuiz = document.getElementById('select-quiz');
@@ -342,9 +459,11 @@ class Game {
         // Auto-Save: Guli Collection
         window.addEventListener('guli-collected', (e) => {
             if (this.currentUser) {
-                saveGuliCollection(this.currentUser.id, this.guliManager.inventory);
-                // Also update XP since it increases on collection
-                updateProfile(this.currentUser.id, { xp: this.guliManager.xp });
+                // Batch updates into one call to be efficient
+                updateProfile(this.currentUser.id, {
+                    collected_gulis: this.guliManager.inventory,
+                    xp: this.guliManager.xp
+                });
             }
         });
 
@@ -360,6 +479,11 @@ class Game {
                 // Click (Only for kampung 0-13)
                 if (i < 14) {
                     el.addEventListener('click', () => {
+                        // Turn validation
+                        if (this.gameState !== 'CONGKAK') return;
+                        if (this.congkakEngine.currentPlayer !== 1) return;
+                        if (this.isProcessingMove) return;
+
                         if (i <= 6) this.handleCongkakMove(i);
                     });
                 }
@@ -381,15 +505,22 @@ class Game {
         // Help Button Toggle
         const helpBtn = document.getElementById('help-btn');
         const mouseHint = document.getElementById('mouse-hint');
+        const toggleHelp = (e) => {
+            if (e) e.stopPropagation();
+            mouseHint?.classList.toggle('hidden');
+        };
+
         if (helpBtn && mouseHint) {
-            helpBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                mouseHint.classList.toggle('hidden');
-            });
+            helpBtn.addEventListener('click', toggleHelp);
             window.addEventListener('click', () => {
                 mouseHint.classList.add('hidden');
             });
         }
+
+        // Integrated Hub Help
+        document.querySelectorAll('.nav-link-help').forEach(el => {
+            el.addEventListener('click', toggleHelp);
+        });
 
         window.addEventListener('click', (e) => this.onPlayerClick(e));
     }
@@ -403,6 +534,7 @@ class Game {
         this.congkakBoard.show();
         this.update2DUI(this.congkakEngine.holes);
         this.updateCongkakUI();
+        this.resizeScaleOverlays();
 
         const challengeBtn = document.getElementById('start-congkak-btn');
         if (challengeBtn) challengeBtn.classList.add('hidden');
@@ -415,30 +547,55 @@ class Game {
         const bountyHud = document.getElementById('bounty-hud');
         const guliVault = document.getElementById('guli-vault-mini');
         const topBar = document.getElementById('top-bar');
-        const bottomNav = document.getElementById('bottom-nav');
+        const bottomNav = document.getElementById('mobile-bottom-nav');
 
         // Screens / Overlays
         const mainMenu = document.getElementById('main-menu');
         const diffSelector = document.getElementById('difficulty-selector');
         const congkakOverlay = document.getElementById('congkak-2d-overlay');
         const leaderboardPanel = document.getElementById('leaderboard-panel');
+        const historyPanel = document.getElementById('history-panel');
         const winScreen = document.getElementById('win-screen');
+        const joystick = document.getElementById('joystick-zone');
+        const helpHint = document.getElementById('help-hint-container');
 
         if (this.gameState === 'MENU') {
-            [hud, worldMap, bountyHud, guliVault, topBar, bottomNav, diffSelector, congkakOverlay, leaderboardPanel, winScreen].forEach(el => el?.classList.add('hidden'));
+            [hud, worldMap, bountyHud, guliVault, topBar, bottomNav, diffSelector, congkakOverlay, leaderboardPanel, historyPanel, winScreen, joystick, helpHint].forEach(el => el?.classList.add('hidden'));
             mainMenu?.classList.remove('hidden');
             return;
         }
 
         // Standard Gameplay UI (Available for Explore & Congkak)
         mainMenu?.classList.add('hidden');
-        [hud, topBar, worldMap, bountyHud, guliVault, leaderboardPanel].forEach(el => el?.classList.remove('hidden'));
+        [hud, topBar, helpHint].forEach(el => el?.classList.remove('hidden'));
+
+        // Responsive Default HUD Panels
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            // Mobile: Show only Guli Bag by default
+            guliVault?.classList.remove('hidden');
+            worldMap?.classList.add('hidden');
+            bountyHud?.classList.add('hidden');
+            leaderboardPanel?.classList.add('hidden');
+            historyPanel?.classList.add('hidden');
+        } else {
+            // Desktop: Show all panels including Leaderboard and History
+            [worldMap, bountyHud, guliVault, leaderboardPanel, historyPanel].forEach(el => el?.classList.remove('hidden'));
+        }
 
         // Reset specific gameplay overlays safely
-        [bottomNav, congkakOverlay, diffSelector].forEach(el => el?.classList.add('hidden'));
+        [bottomNav, congkakOverlay, diffSelector, joystick].forEach(el => el?.classList.add('hidden'));
+
+        // Update joystick button state
+        const joyBtn = document.getElementById('nav-joystick');
+        if (joyBtn) {
+            joyBtn.style.opacity = this.joystickEnabled ? '1' : '0.4';
+            joyBtn.style.filter = this.joystickEnabled ? 'none' : 'grayscale(1)';
+        }
 
         if (this.gameState === 'EXPLORE') {
             bottomNav?.classList.remove('hidden');
+            if (this.joystickEnabled && isMobile) joystick?.classList.remove('hidden');
         } else if (this.gameState === 'CONGKAK') {
             congkakOverlay?.classList.remove('hidden');
         }
@@ -580,10 +737,18 @@ class Game {
             for await (const step of moveGenerator) {
                 if (step.currentPos !== undefined) this.update2DHighlights(step.currentPos);
 
-                if (step.status === 'dropping' || step.status === 'pickup_continue') {
+                if (step.status === 'dropping' || step.status === 'pickup_continue' || step.status === 'steal') {
                     const handInfo = step.handCount !== undefined ? ` (${step.handCount})` : "";
                     const statusEl = document.getElementById('game-status');
-                    if (statusEl) statusEl.textContent = `SOWING${handInfo}`;
+                    if (statusEl) {
+                        if (step.status === 'steal') {
+                            statusEl.textContent = `STOLE ${step.stolenCount} GULIS! 💎`;
+                            statusEl.style.color = "#4ade80";
+                            await new Promise(r => setTimeout(r, 600));
+                        } else {
+                            statusEl.textContent = `SOWING${handInfo}`;
+                        }
+                    }
                 }
 
                 if (step.holes) {
@@ -597,46 +762,8 @@ class Game {
                 if (step.status === 'end') {
                     this.update2DHighlights(null);
                     if (step.gameOver) {
-                        this.gameState = 'WIN';
-                        document.getElementById('win-screen')?.classList.remove('hidden');
-
-                        const playerScore = this.congkakEngine.getScore(1);
-                        const aiScore = this.congkakEngine.getScore(2);
-                        const won = playerScore > aiScore;
-
-                        const winMsg = document.getElementById('win-msg');
-                        const wonGulis = this.congkakEngine.getPlayerStoreGulis();
-
-                        // Return gulis logic
-                        wonGulis.forEach(type => {
-                            if (this.guliManager.inventory.hasOwnProperty(type)) {
-                                this.guliManager.inventory[type]++;
-                            }
-                        });
-                        this.guliManager.updateVault();
-
-                        const coinsEarned = won ? (this.rewards[this.difficulty] || 100) : -this.penalty;
-                        const xpEarned = won ? 200 : 50;
-                        this.addCoins(coinsEarned);
-                        this.guliManager.xp += xpEarned;
-                        this.guliManager.updateHUD();
-
-                        if (winMsg) {
-                            if (!won) {
-                                winMsg.innerHTML = `DEFEATED!<br><span style="font-size:1rem;color:#f87171">Lost ${this.penalty} 🪙</span>`;
-                            } else {
-                                winMsg.innerHTML = `VICTORY!<br><span style="font-size:1rem;color:#4ade80">+${coinsEarned} 🪙</span>`;
-                            }
-                        }
-
-                        if (this.currentUser) {
-                            saveMatchResult(this.currentUser.id, {
-                                playerScore, aiScore, won,
-                                gulisSpent: 49,
-                                gulisWon: wonGulis.length,
-                                coinsEarned, xpEarned
-                            });
-                        }
+                        this.handleGameOver();
+                        return;
                     } else if (step.currentPlayer === 2) {
                         // Crucial: End THIS move processing before starting AI's
                         this.isProcessingMove = false;
@@ -659,9 +786,108 @@ class Game {
         if (this.gameState !== 'CONGKAK' || this.congkakEngine.gameOver) return;
         if (this.congkakEngine.currentPlayer !== 2) return;
 
+        // Small thinking delay for Tok Aki
+        const statusEl = document.getElementById('game-status');
+        if (statusEl) statusEl.textContent = "TOK AKI IS THINKING...";
+
         const aiMove = this.congkakEngine.getAIRecommendation(this.difficulty);
         if (aiMove !== null) {
+            // Wait a bit more for realistic thinking
+            await new Promise(r => setTimeout(r, 600));
             await this.handleCongkakMove(aiMove);
+        } else {
+            // No moves left - check game over
+            this.congkakEngine.checkGameOver();
+            this.updateCongkakUI();
+            if (this.congkakEngine.gameOver) this.handleGameOver();
+        }
+    }
+
+    handleGameOver() {
+        if (this.gameState === 'WIN') return; // Avoid double triggering
+        this.gameState = 'WIN';
+        this.isProcessingMove = false;
+        this.updateCongkakUI();
+
+        // CRITICAL: Hide congkak overlay FIRST so win screen is visible
+        document.getElementById('congkak-2d-overlay')?.classList.add('hidden');
+
+        const playerScore = this.congkakEngine.getWeightedScore(1);
+        const aiScore = this.congkakEngine.getWeightedScore(2);
+        const won = playerScore > aiScore;
+
+        const winMsg = document.getElementById('win-msg');
+        const wonGulis = this.congkakEngine.getPlayerStoreGulis();
+
+        // Return gulis logic
+        wonGulis.forEach(type => {
+            if (this.guliManager.inventory.hasOwnProperty(type)) {
+                this.guliManager.inventory[type]++;
+            }
+        });
+        this.guliManager.updateVault();
+
+        const coinsEarned = won ? (this.rewards[this.difficulty] || 100) : -this.penalty;
+        const xpEarned = won ? 200 : 50;
+        this.addCoins(coinsEarned);
+        this.guliManager.xp += xpEarned;
+        this.guliManager.updateHUD();
+
+        // Update win screen content with actual scores
+        if (winMsg) {
+            if (!won) {
+                winMsg.innerHTML = `DEFEATED!<br><span style="font-size:1rem;color:#f87171">Lost ${this.penalty} 🪙</span>`;
+            } else {
+                winMsg.innerHTML = `VICTORY!<br><span style="font-size:1rem;color:#4ade80">+${coinsEarned} 🪙</span>`;
+            }
+        }
+
+        // Update the sub-text and rewards with actual data
+        const winSub = document.querySelector('#win-screen .win-sub');
+        if (winSub) {
+            winSub.innerHTML = `Skor Anda: <b>${playerScore}</b> vs Tok Aki: <b>${aiScore}</b>`;
+        }
+        const winRewards = document.querySelector('#win-screen .win-rewards');
+        if (winRewards) {
+            const coinSign = coinsEarned >= 0 ? '+' : '';
+            winRewards.innerHTML = `
+                <div class="reward-item">🪙 ${coinSign}${coinsEarned}</div>
+                <div class="reward-item">🌟 +${xpEarned} XP</div>
+            `;
+        }
+
+        // Update stars based on result
+        const winStars = document.querySelector('#win-screen .win-stars');
+        if (winStars) {
+            winStars.textContent = won ? '★★★' : '☆☆☆';
+            winStars.style.color = won ? '' : '#666';
+        }
+
+        // NOW show win screen
+        document.getElementById('win-screen')?.classList.remove('hidden');
+
+        // 🎉 Confetti celebration on VICTORY!
+        if (won) {
+            const end = Date.now() + 2500;
+            const colors = ['#FFB800', '#FF6B35', '#FFD54F', '#4CAF50', '#ffffff'];
+            (function frame() {
+                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0, y: 0.6 }, colors });
+                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1, y: 0.6 }, colors });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            })();
+            // Big center burst
+            setTimeout(() => confetti({ particleCount: 150, spread: 100, origin: { y: 0.5 }, colors }), 300);
+        }
+
+        if (this.currentUser) {
+            saveMatchResult(this.currentUser.id, {
+                playerScore, aiScore, won,
+                gulisSpent: 49,
+                gulisWon: wonGulis.length,
+                coinsEarned, xpEarned
+            });
+            // Also persist XP to profile
+            updateProfile(this.currentUser.id, { xp: this.guliManager.xp });
         }
     }
 
@@ -713,6 +939,13 @@ class Game {
         const aiAv = document.getElementById('ai-avatar');
         if (p1Av) p1Av.classList.toggle('active-turn', p1Turn);
         if (aiAv) aiAv.classList.toggle('active-turn', !p1Turn);
+
+        // Safety: If board is empty but game not marked over, mark it!
+        const boardEmpty = this.congkakEngine.holes.slice(0, 14).every(h => h.length === 0);
+        if (boardEmpty && !this.congkakEngine.gameOver) {
+            this.congkakEngine.checkGameOver();
+            this.handleGameOver();
+        }
 
         this.update2DUI(this.congkakEngine.holes);
     }
@@ -894,6 +1127,23 @@ class Game {
             }
         }
         this.renderer.render(this.scene, this.camera);
+    }
+
+    resizeScaleOverlays() {
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        // Base width for scaling is slightly more than our largest modal (1280px)
+        const baseWidth = 1280;
+        const baseHeight = 940;
+
+        const scaleW = (windowWidth * 0.96) / baseWidth;
+        const scaleH = (windowHeight * 0.96) / baseHeight;
+
+        const scale = Math.min(scaleW, scaleH, 1);
+
+        // Set variable on root so all modals can use it
+        document.documentElement.style.setProperty('--modal-scale', scale);
     }
 }
 

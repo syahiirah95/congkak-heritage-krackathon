@@ -11,36 +11,45 @@ export class CongkakEngine {
         this.holes = new Array(16).fill(null).map(() => []);
 
         if (playerInventory) {
-            const guliPool = [];
+            // Same distribution for both sides if inventory provided
+            const totalNeeded = 49 * 2;
+            const fullPool = [];
+
+            const currentGulis = [];
             for (const [type, count] of Object.entries(playerInventory)) {
-                for (let i = 0; i < count; i++) guliPool.push(type);
+                for (let i = 0; i < count; i++) currentGulis.push(type);
             }
 
-            // Shuffle for fun
-            for (let i = guliPool.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [guliPool[i], guliPool[j]] = [guliPool[j], guliPool[i]];
-            }
-
-            // Exactly 7 seeds per hole for Player 1
-            for (let i = 0; i < 7; i++) {
-                for (let j = 0; j < 7; j++) {
-                    this.holes[i].push(guliPool.length > 0 ? guliPool.pop() : 'white');
+            // Fill fullPool by repeating the distribution of currentGulis until we have 98
+            for (let i = 0; i < totalNeeded; i++) {
+                if (currentGulis.length > 0) {
+                    fullPool.push(currentGulis[i % currentGulis.length]);
+                } else {
+                    fullPool.push('white');
                 }
             }
 
-            // Exactly 7 seeds per hole for AI
+            // Shuffle fullPool
+            for (let i = fullPool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [fullPool[i], fullPool[j]] = [fullPool[j], fullPool[i]];
+            }
+
+            // Fill Player 1 holes
+            for (let i = 0; i < 7; i++) {
+                for (let j = 0; j < 7; j++) {
+                    this.holes[i].push(fullPool.pop());
+                }
+            }
+
+            // Exactly 7 seeds per hole for AI, following same pool
             for (let i = 7; i < 14; i++) {
                 for (let j = 0; j < 7; j++) {
-                    let type = 'white';
-                    const rand = Math.random();
-                    if (rand < 0.05) type = 'blue';
-                    else if (rand < 0.1) type = 'red';
-                    else if (rand < 0.2) type = 'yellow';
-                    this.holes[i].push(type);
+                    this.holes[i].push(fullPool.pop());
                 }
             }
         } else {
+            // Normal fallback if no inventory
             for (let i = 0; i < 14; i++) {
                 for (let j = 0; j < 7; j++) {
                     let type = 'white';
@@ -55,7 +64,6 @@ export class CongkakEngine {
 
         this.currentPlayer = 1;
         this.gameOver = false;
-        this.extraTurns = 0;
     }
 
     getNextPos(currentPos) {
@@ -69,12 +77,23 @@ export class CongkakEngine {
 
     getScore(playerIdx) {
         const storeIdx = playerIdx === 1 ? 14 : 15;
-        return this.holes[storeIdx].reduce((total, type) => {
-            if (type === 'black') return total + 5;
-            if (type === 'red') return total + 3;
-            if (type === 'yellow') return total + 2;
-            return total + 1;
-        }, 0);
+        return this.holes[storeIdx].length;
+    }
+
+    getWeightedScore(playerIdx) {
+        const storeIdx = playerIdx === 1 ? 14 : 15;
+        const stack = this.holes[storeIdx];
+
+        // --- POWER SCORING (BASED ON RARITY) ---
+        const pointValues = {
+            black: 5,    // Mythic
+            red: 3,      // Rare
+            yellow: 2,   // Uncommon
+            white: 1,    // Common
+            blue: 10     // Epic (New: High Value + Steal Power)
+        };
+
+        return stack.reduce((total, type) => total + (pointValues[type] || 1), 0);
     }
 
     getPlayerStoreGulis() {
@@ -89,7 +108,7 @@ export class CongkakEngine {
         return true;
     }
 
-    async *makeMoveAnimated(holeIdx) {
+    async * makeMoveAnimated(holeIdx) {
         if (!this.isValidMove(holeIdx)) return;
 
         let hand = [...this.holes[holeIdx]];
@@ -114,9 +133,18 @@ export class CongkakEngine {
             const guli = hand.pop();
             this.holes[currentPos].push(guli);
 
-            // SPECIAL GULI EFFECT: Blue guli gives an extra turn when landed in store
-            if (guli === 'blue' && (currentPos === p1Store || currentPos === p2Store)) {
-                this.extraTurns++;
+            // NEW SPECIAL GULI EFFECT: Blue guli steals 3 seeds from opponent's store when landed in OWN store
+            const ownStore = this.currentPlayer === 1 ? p1Store : p2Store;
+            const oppStore = this.currentPlayer === 1 ? p2Store : p1Store;
+            if (guli === 'blue' && currentPos === ownStore) {
+                const stolen = [];
+                for (let s = 0; s < 3; s++) {
+                    if (this.holes[oppStore].length > 0) {
+                        stolen.push(this.holes[oppStore].pop());
+                    }
+                }
+                this.holes[ownStore].push(...stolen);
+                yield { holes: this.cloneHoles(), status: 'steal', stolenCount: stolen.length };
             }
 
             yield { holes: this.cloneHoles(), status: 'dropping', currentPos, handCount: hand.length };
@@ -135,7 +163,7 @@ export class CongkakEngine {
             (this.currentPlayer === 2 && currentPos === p2Store);
 
         if (landedInOwnStore) {
-            this.extraTurns++;
+            // Continuation move: keep turn but don't stack extra turn counters
             yield { status: 'extra_turn_bonus' };
         } else {
             // Tembak (Capture) logic: last guli landed in empty hole on OWN side
@@ -151,12 +179,7 @@ export class CongkakEngine {
                 }
             }
 
-            // Switch player if no extra turns available
-            if (this.extraTurns > 0) {
-                this.extraTurns--;
-            } else {
-                this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
-            }
+            this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
         }
 
         this.checkGameOver();
@@ -204,17 +227,17 @@ export class CongkakEngine {
             return validMoves[Math.floor(Math.random() * validMoves.length)];
         }
 
-        // --- NORMAL & HARD: Prioritize Extra Turns ---
+        // --- NORMAL & HARD: Prioritize High Value / Steal ---
         for (const m of validMoves) {
             const count = this.getHoleCount(m);
             let checkPos = m;
             for (let i = 0; i < count; i++) {
                 checkPos = this.getNextPos(checkPos);
-                if (this.currentPlayer === 1 && checkPos === 15) checkPos = this.getNextPos(checkPos); // Skip opponent store
-                if (this.currentPlayer === 2 && checkPos === 14) checkPos = this.getNextPos(checkPos); // Skip opponent store
+                if (this.currentPlayer === 1 && checkPos === 15) checkPos = this.getNextPos(checkPos);
+                if (this.currentPlayer === 2 && checkPos === 14) checkPos = this.getNextPos(checkPos);
             }
             const ownStore = this.currentPlayer === 1 ? 14 : 15;
-            if (checkPos === ownStore) return m; // Land in own store
+            if (checkPos === ownStore) return m; // AI will still prioritize landing ANY guli in store
         }
 
         if (difficulty === 'normal') {
