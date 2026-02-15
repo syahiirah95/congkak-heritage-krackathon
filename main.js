@@ -22,6 +22,17 @@ class Game {
         this.init();
         this.setupEvents();
 
+        // Sound Toggle
+        document.getElementById('mute-btn')?.addEventListener('click', (e) => {
+            this.audioManager.toggleMute();
+            const icon = e.currentTarget.querySelector('i');
+            if (icon) {
+                const newIcon = this.audioManager.isMuted ? 'volume-x' : 'volume-2';
+                icon.setAttribute('data-lucide', newIcon);
+                if (window.lucide) lucide.createIcons();
+            }
+        });
+
         this.clock = new THREE.Clock();
         this.raycaster = new THREE.Raycaster();
         this.mouse = new THREE.Vector2();
