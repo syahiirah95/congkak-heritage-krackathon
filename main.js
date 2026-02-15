@@ -243,7 +243,7 @@ class Game {
             antialias: true,
             powerPreference: "high-performance"
         });
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -254,8 +254,8 @@ class Game {
         const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
         sunLight.position.set(20, 50, 20);
         sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 2048;
-        sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.mapSize.width = 1024;
+        sunLight.shadow.mapSize.height = 1024;
         this.scene.add(sunLight);
 
         // Fixed Fog: density was way too high (0.012 -> 0.0025)
@@ -1139,8 +1139,12 @@ class Game {
 
                         talkBtn.style.display = 'flex';
                         setTimeout(() => talkBtn.style.opacity = '1', 10);
-                        talkBtn.style.left = `${(vector.x * 0.5 + 0.5) * window.innerWidth}px`;
-                        talkBtn.style.top = `${(-vector.y * 0.5 + 0.5) * window.innerHeight}px`;
+
+                        const screenX = (vector.x * 0.5 + 0.5) * window.innerWidth;
+                        const screenY = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+                        talkBtn.style.left = '0px';
+                        talkBtn.style.top = '0px';
+                        talkBtn.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -100%)`;
                     } else {
                         this.activeNPC = null;
                         talkBtn.style.display = 'none';

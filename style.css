@@ -1898,7 +1898,7 @@ body.pointer-locked #crosshair {
     z-index: 1000;
     transition: opacity 0.3s;
     white-space: nowrap;
-    animation: bubbleBounce 2s infinite ease-in-out;
+    /* animation: bubbleBounce 2s infinite ease-in-out; */
 }
 
 .animal-bubble::after {
@@ -2112,8 +2112,8 @@ body.pointer-locked #crosshair {
     width: 850px;
     height: 70px;
     background: rgba(30, 20, 15, 0.9);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     border-radius: 35px;
     display: flex;
     align-items: center;

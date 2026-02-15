@@ -18,6 +18,21 @@ export class World {
         this.hidingSpots = []; // Positions for guli
         this.animalBubbles = new Map(); // Store DOM elements for bubbles
 
+        // 🟢 Optimization: Shared Materials
+        this.materials = {
+            trunk: new THREE.MeshStandardMaterial({ color: 0x4d2911 }),
+            leaf: new THREE.MeshStandardMaterial({ color: 0x2d5a27, roughness: 0.8 }),
+            wood: new THREE.MeshStandardMaterial({ map: this.loadTex('/assets/textures/environment/wood_planks.png'), roughness: 0.85 }),
+            roof: new THREE.MeshStandardMaterial({ map: this.loadTex('/assets/textures/environment/attap_roof.png'), roughness: 0.95 }),
+            stilt: new THREE.MeshStandardMaterial({ map: this.loadTex('/assets/textures/environment/bamboo_stilt.png'), roughness: 0.7 }),
+            window: new THREE.MeshStandardMaterial({
+                map: this.loadTex('/assets/textures/environment/kampung_window.png'),
+                transparent: true,
+                alphaTest: 0.3,
+                side: THREE.DoubleSide
+            })
+        };
+
         // Clean up any stale bubbles from HMR
         document.querySelectorAll('.animal-bubble').forEach(el => el.remove());
 
@@ -158,20 +173,11 @@ export class World {
     createHouse(x, z) {
         const group = new THREE.Group();
 
-        // Restore High-Quality Textures
-        const woodTex = this.loadTex('/assets/textures/environment/wood_planks.png');
-        const woodMat = new THREE.MeshStandardMaterial({ map: woodTex, roughness: 0.85 });
-        const roofTex = this.loadTex('/assets/textures/environment/attap_roof.png');
-        const roofMat = new THREE.MeshStandardMaterial({ map: roofTex, roughness: 0.95 });
-        const stiltTex = this.loadTex('/assets/textures/environment/bamboo_stilt.png');
-        const stiltMat = new THREE.MeshStandardMaterial({ map: stiltTex, roughness: 0.7 });
-        const windowTex = this.loadTex('/assets/textures/environment/kampung_window.png');
-        const windowMat = new THREE.MeshStandardMaterial({
-            map: windowTex,
-            transparent: true,
-            alphaTest: 0.3,
-            side: THREE.DoubleSide
-        });
+        // Use shared materials
+        const woodMat = this.materials.wood;
+        const roofMat = this.materials.roof;
+        const stiltMat = this.materials.stilt;
+        const windowMat = this.materials.window;
 
         // Stilts
         const stiltGeo = new THREE.CylinderGeometry(0.1, 0.1, 1.5, 8);
@@ -291,8 +297,8 @@ export class World {
 
     createLowPolyTree(x, z) {
         const group = new THREE.Group();
-        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4d2911 });
-        const leafMat = new THREE.MeshStandardMaterial({ color: 0x2d5a27, roughness: 0.8 });
+        const trunkMat = this.materials.trunk;
+        const leafMat = this.materials.leaf;
 
         const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 3, 6), trunkMat);
         trunk.position.y = 1.5;
@@ -762,6 +768,7 @@ export class World {
 
         bubble.style.left = `${x}px`;
         bubble.style.top = `${y}px`;
+        bubble.style.transform = `translate(-50%, -100%)`;
         bubble.style.opacity = '1';
         bubble.style.display = 'block';
     }

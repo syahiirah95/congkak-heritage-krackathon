@@ -12,21 +12,13 @@ export class AudioManager {
     }
 
     init() {
-        this.bgMusic = new Audio(this.urls.bg);
-        this.bgMusic.loop = true;
-        this.bgMusic.volume = 0.3;
-
-        this.ambient = new Audio(this.urls.ambient);
-        this.ambient.loop = true;
-        this.ambient.volume = 0.2;
+        // All soundtracks removed to prevent lag
+        this.bgMusic = null;
+        this.ambient = null;
     }
 
     start() {
-        if (!this.bgMusic) this.init();
-
-        // Browsers require user interaction to play audio
-        this.bgMusic.play().catch(e => console.warn("Audio play blocked", e));
-        this.ambient.play().catch(e => console.warn("Audio play blocked", e));
+        // No audio to start
     }
 
     toggleMute() {

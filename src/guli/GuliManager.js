@@ -95,34 +95,31 @@ export class GuliManager {
         const isRare = (type === 'blue' || type === 'black');
 
         const mesh = new THREE.Mesh(
-            new THREE.SphereGeometry(0.5, 24, 24), // Smoother sphere
+            new THREE.SphereGeometry(0.4, 12, 12), // Optimized geometry
             new THREE.MeshStandardMaterial({
                 map: this.textures[type],
-                color: type === 'black' ? 0x333333 : 0xffffff, // Use white/grey so texture shows original colors
+                color: type === 'black' ? 0x333333 : 0xffffff,
                 emissive: color,
-                emissiveIntensity: 0.4, // Lowered significantly to see texture details
+                emissiveIntensity: 0.8, // Increased emissive since light is removed
                 metalness: 0.4,
-                roughness: 0.05, // Very shiny glass look
+                roughness: 0.05,
                 envMapIntensity: 1.0
             })
         );
-        mesh.castShadow = true;
+        mesh.castShadow = false; // Disable expensive shadows for small objects
         group.add(mesh);
 
-        // PointLight from below for a very subtle under-glow
-        const light = new THREE.PointLight(color, 2, 3);
-        light.position.set(0, -0.4, 0);
-        group.add(light);
+        // REMOVED PointLight from gulis - significantly improves performance
 
         // Glow sprite (Standardized to rare guli size/opacity)
         const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
             map: this.glowTexture,
             blending: THREE.AdditiveBlending,
             transparent: true,
-            opacity: 0.6 // Slightly lower to not over-glow the texture
+            opacity: 0.8
         }));
-        sprite.scale.set(1.8, 1.8, 1);
-        sprite.position.y = -0.1;
+        sprite.scale.set(1.5, 1.5, 1);
+        sprite.position.y = 0;
         group.add(sprite);
 
         group.position.set(x, y, z);
