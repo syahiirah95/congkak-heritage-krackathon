@@ -25,9 +25,9 @@ class Game {
         // Sound Toggle
         document.getElementById('mute-btn')?.addEventListener('click', (e) => {
             this.audioManager.toggleMute();
-            const icon = e.currentTarget.querySelector('i');
+            const btn = e.currentTarget;
+            const icon = btn.querySelector('i, svg');
             if (icon) {
-                // Lucide uses 'volume-2' for on and 'volume-x' for off
                 const newIconName = this.audioManager.isMuted ? 'volume-x' : 'volume-2';
                 icon.setAttribute('data-lucide', newIconName);
                 if (window.lucide) lucide.createIcons();
@@ -416,7 +416,7 @@ class Game {
             const isHidden = document.body.classList.contains('hud-hidden');
 
             // Update Lucide icon
-            const icon = btn.querySelector('i');
+            const icon = btn.querySelector('i, svg');
             if (icon) {
                 icon.setAttribute('data-lucide', isHidden ? 'eye-off' : 'eye');
                 if (window.lucide) lucide.createIcons();
