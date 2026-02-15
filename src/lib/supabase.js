@@ -4,17 +4,32 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 const isConfigured = SUPABASE_URL && !SUPABASE_URL.includes('YOUR_');
+if (!isConfigured) {
+    console.error("❌ SUPABASE NOT CONFIGURED! Check your .env file and ensure keys start with VITE_");
+}
 export const supabase = isConfigured ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 // ─── Authentication ───────────────────────────────────────────
 
 export async function signInWithGoogle() {
-    if (!supabase) return console.warn('Supabase not configured');
+    if (!supabase) {
+        alert("Supabase client is NULL. Check console for errors.");
+        return null;
+    }
+    console.log("Attempting Google Login with redirect to:", window.location.origin);
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin }
+        options: {
+            redirectTo: window.location.origin,
+            queryParams: {
+                prompt: 'select_account' // Forces account selection screen
+            }
+        }
     });
-    if (error) console.error('Google login error:', error.message);
+    if (error) {
+        console.error('Google login error:', error.message);
+        alert("Google Error: " + error.message);
+    }
     return data;
 }
 

@@ -6,8 +6,8 @@ export class AudioManager {
 
         // Using sample URLs for demo purposes
         this.urls = {
-            bg: 'https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a012d4.mp3', // Relaxing track
-            ambient: 'https://cdn.pixabay.com/audio/2021/08/04/audio_13b5a1b5c4.mp3' // Forest ambience
+            bg: 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Lagu_Padi.ogg',
+            ambient: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
         };
     }
 

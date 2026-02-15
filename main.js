@@ -60,6 +60,15 @@ class Game {
         this.updateUIVisibility();
         if (window.lucide) lucide.createIcons();
         this.animate();
+
+        // 🟢 Hide Preloader once game is ready
+        setTimeout(() => {
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                preloader.style.opacity = '0';
+                setTimeout(() => preloader.style.display = 'none', 500);
+            }
+        }, 800);
     }
 
     async setupAuth() {
