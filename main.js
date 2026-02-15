@@ -27,8 +27,9 @@ class Game {
             this.audioManager.toggleMute();
             const icon = e.currentTarget.querySelector('i');
             if (icon) {
-                const newIcon = this.audioManager.isMuted ? 'volume-x' : 'volume-2';
-                icon.setAttribute('data-lucide', newIcon);
+                // Lucide uses 'volume-2' for on and 'volume-x' for off
+                const newIconName = this.audioManager.isMuted ? 'volume-x' : 'volume-2';
+                icon.setAttribute('data-lucide', newIconName);
                 if (window.lucide) lucide.createIcons();
             }
         });
@@ -79,6 +80,8 @@ class Game {
                 preloader.style.opacity = '0';
                 setTimeout(() => preloader.style.display = 'none', 500);
             }
+            // Re-trigger icon creation just in case
+            if (window.lucide) lucide.createIcons();
         }, 800);
     }
 

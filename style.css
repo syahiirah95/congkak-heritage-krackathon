@@ -121,6 +121,40 @@ canvas#bg {
     color: var(--primary-light);
 }
 
+.hud-toggle-btn {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    border: 2px solid var(--primary) !important;
+    background: rgba(30, 15, 5, 0.9) !important;
+    color: var(--primary) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    backdrop-filter: blur(10px) !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    margin: 0 4px !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 101 !important;
+}
+
+.hud-toggle-btn:hover {
+    background: var(--primary) !important;
+    color: #000 !important;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px var(--primary);
+}
+
+.hud-toggle-btn i {
+    width: 20px !important;
+    height: 20px !important;
+    pointer-events: none;
+}
+
 .resource-pill {
     display: flex;
     align-items: center;
