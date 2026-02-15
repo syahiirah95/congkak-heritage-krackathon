@@ -74,12 +74,13 @@ export class GuliManager {
             this.createGuli(spot.x, spot.y, spot.z, pickedType);
         }
 
-        // Always spawn SCAM gulis randomly (mixed colors!)
-        for (let j = 0; j < 8; j++) {
-            const scamSpot = spots[Math.floor(Math.random() * spots.length)];
-            const scamType = this.scamTypes[Math.floor(Math.random() * this.scamTypes.length)];
-            this.createGuli(scamSpot.x + 1, scamSpot.y, scamSpot.z + 1, scamType);
-        }
+        // Spawn 10 of EACH scam animal type (monyet)
+        this.scamTypes.forEach(scamType => {
+            for (let k = 0; k < 10; k++) {
+                const scamSpot = spots[Math.floor(Math.random() * spots.length)];
+                this.createGuli(scamSpot.x + (Math.random() - 0.5) * 2, scamSpot.y, scamSpot.z + (Math.random() - 0.5) * 2, scamType);
+            }
+        });
     }
 
     createGuli(x, y, z, type) {
